@@ -91,5 +91,6 @@ if __name__ == '__main__':
           author_email='atz.togo@gmail.com',
           url='http://phonopy.sourceforge.net/',
           packages=packages_phonopy,
+	  keywords = ['science', 'physics', 'ase', 'phonons', 'vibrations', 'crystals'],
           scripts=scripts_phonopy,
           ext_modules=ext_modules_phonopy)
