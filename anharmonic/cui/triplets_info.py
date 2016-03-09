@@ -67,7 +67,7 @@ def write_grid_points(primitive,
         gadrs_hdf5_fname = write_grid_address_to_hdf5(grid_address, mesh)
 
         print("Ir-grid points are written into \"ir_grid_points.yaml\".")
-        print("Grid addresses are written into \"%s\"." % gadrs_hdf5_fname)
+        print("Grid addresses are written into \"{0!s}\".".format(gadrs_hdf5_fname))
 
 def show_num_triplets(primitive,
                       mesh,
@@ -98,5 +98,4 @@ def show_num_triplets(primitive,
                                                gp,
                                                symprec=options.symprec)
         q = grid_address[gp] / np.array(mesh, dtype='double')
-        print("  %5d     (%5.2f %5.2f %5.2f)  %8d" %
-              (gp, q[0], q[1], q[2], num_triplets))
+        print("  {0:5d}     ({1:5.2f} {2:5.2f} {3:5.2f})  {4:8d}".format(gp, q[0], q[1], q[2], num_triplets))

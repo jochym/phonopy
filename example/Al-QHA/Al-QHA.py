@@ -16,7 +16,7 @@ entropy = []
 cv = []
 fe = []
 for index in range(-5,6):
-    filename = "thermal_properties.yaml-%d" % index
+    filename = "thermal_properties.yaml-{0:d}".format(index)
     print "Reading", filename
     thermal_properties = yaml.load(open(filename),
                                   Loader=Loader)['thermal_properties']

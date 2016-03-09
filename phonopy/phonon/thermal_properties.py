@@ -245,32 +245,32 @@ class ThermalProperties(ThermalPropertiesBase):
         lines.append("  entropy:       J/K/mol")
         lines.append("  heat_capacity: J/K/mol")
         lines.append("")
-        lines.append("natom: %5d" % (self._frequencies[0].shape[0] // 3))
+        lines.append("natom: {0:5d}".format((self._frequencies[0].shape[0] // 3)))
         if self._cutoff_frequency:
-            lines.append("cutoff_frequency: %8.3f" % self._cutoff_frequency)
-        lines.append("num_modes: %d" % self._num_modes)
-        lines.append("num_integrated_modes: %d" % self._num_integrated_modes)
+            lines.append("cutoff_frequency: {0:8.3f}".format(self._cutoff_frequency))
+        lines.append("num_modes: {0:d}".format(self._num_modes))
+        lines.append("num_integrated_modes: {0:d}".format(self._num_integrated_modes))
         if self._band_indices is not None:
             bi = self._band_indices + 1
             lines.append("band_index: [ " + ("%d, " * (len(bi) - 1)) %
-                    tuple(bi[:-1]) + ("%d ]" % bi[-1]))
+                    tuple(bi[:-1]) + ("{0:d} ]".format(bi[-1])))
         lines.append("")
-        lines.append("zero_point_energy: %15.7f" % self._zero_point_energy)
-        lines.append("high_T_entropy:    %15.7f" % (self._high_T_entropy * 1000))
+        lines.append("zero_point_energy: {0:15.7f}".format(self._zero_point_energy))
+        lines.append("high_T_entropy:    {0:15.7f}".format((self._high_T_entropy * 1000)))
         lines.append("")
         lines.append("thermal_properties:")
         temperatures, fe, entropy, cv = self._thermal_properties
         for i, t in enumerate(temperatures):
-            lines.append("- temperature:   %15.7f" % t)
-            lines.append("  free_energy:   %15.7f" % fe[i])
-            lines.append("  entropy:       %15.7f" % entropy[i])
+            lines.append("- temperature:   {0:15.7f}".format(t))
+            lines.append("  free_energy:   {0:15.7f}".format(fe[i]))
+            lines.append("  entropy:       {0:15.7f}".format(entropy[i]))
             # Sometimes 'nan' of C_V is returned at low temperature.
             if np.isnan(cv[i]):
-                lines.append("  heat_capacity: %15.7f" % 0 )
+                lines.append("  heat_capacity: {0:15.7f}".format(0) )
             else:
-                lines.append("  heat_capacity: %15.7f" % cv[i])
-            lines.append("  energy:        %15.7f" %
-                         (fe[i] + entropy[i] * t / 1000))
+                lines.append("  heat_capacity: {0:15.7f}".format(cv[i]))
+            lines.append("  energy:        {0:15.7f}".format(
+                         (fe[i] + entropy[i] * t / 1000)))
             lines.append("")
         return lines
 
@@ -279,34 +279,34 @@ class ThermalProperties(ThermalPropertiesBase):
         lines.append("projected_thermal_properties:")
         temperatures, fe, entropy, cv = self._projected_thermal_properties
         for i, t in enumerate(temperatures):
-            lines.append("- temperature:   %13.7f" % t)
+            lines.append("- temperature:   {0:13.7f}".format(t))
             line = "  free_energy:   [ "
-            line += ", ".join(["%13.7f" % x for x in fe[i]])
-            line += " ] # %13.7f" % np.sum(fe[i])
+            line += ", ".join(["{0:13.7f}".format(x) for x in fe[i]])
+            line += " ] # {0:13.7f}".format(np.sum(fe[i]))
             lines.append(line)
             line = "  entropy:       [ "
-            line += ", ".join(["%13.7f" % x for x in entropy[i]])
-            line += " ] # %13.7f" % np.sum(entropy[i])
+            line += ", ".join(["{0:13.7f}".format(x) for x in entropy[i]])
+            line += " ] # {0:13.7f}".format(np.sum(entropy[i]))
             lines.append(line)
             # Sometimes 'nan' of C_V is returned at low temperature.
             line = "  heat_capacity: [ "
             sum_cv = 0.0
             for j, cv_i in enumerate(cv[i]):
                 if np.isnan(cv_i):
-                    line += "%13.7f" % 0
+                    line += "{0:13.7f}".format(0)
                 else:
                     sum_cv += cv_i
-                    line += "%13.7f" % cv_i
+                    line += "{0:13.7f}".format(cv_i)
                 if j < len(cv[i]) - 1:
                     line += ", "
                 else:
                     line += " ]"
-            line += " # %13.7f" % sum_cv
+            line += " # {0:13.7f}".format(sum_cv)
             lines.append(line)
             energy = fe[i] + entropy[i] * t / 1000
             line = "  energy:        [ "
-            line += ", ".join(["%13.7f" % x for x in energy])
-            line += " ] # %13.7f" % np.sum(energy)
+            line += ", ".join(["{0:13.7f}".format(x) for x in energy])
+            line += " ] # {0:13.7f}".format(np.sum(energy))
             lines.append(line)
         return lines
             

@@ -987,11 +987,11 @@ class IrReps:
             if self._log_level > 1:
                 text = ""
                 for v in chars_ordered:
-                    text += "%5.2f " % abs(v)
+                    text += "{0:5.2f} ".format(abs(v))
                 if found:
-                    print("%s %s" % (text, ct_label))
+                    print("{0!s} {1!s}".format(text, ct_label))
                 else:
-                    print("%s Not found" % text)
+                    print("{0!s} Not found".format(text))
                 
         return ir_labels
 
@@ -1010,8 +1010,8 @@ class IrReps:
         print("-------------------------------")
         print("  Irreducible representations")
         print("-------------------------------")
-        print("q-point: %s" % self._q)
-        print("Point group: %s" % self._pointgroup_symbol)
+        print("q-point: {0!s}".format(self._q))
+        print("Point group: {0!s}".format(self._pointgroup_symbol))
         print('')
         
         if (np.abs(self._q) < self._symprec).all():
@@ -1030,7 +1030,7 @@ class IrReps:
         print("Transformation matrix:")
         print('')
         for v in self._transformation_matrix:
-            print("%6.3f %6.3f %6.3f" % tuple(v))
+            print("{0:6.3f} {1:6.3f} {2:6.3f}".format(*tuple(v)))
         print('')
         print("Rotation matrices by transformation matrix:")
         print('')
@@ -1040,7 +1040,7 @@ class IrReps:
         print("Character table:")
         print('')
         for i, deg_set in enumerate(self._degenerate_sets):
-            text = "%3d (%8.3f): " % (deg_set[0] + 1, self._freqs[deg_set[0]])
+            text = "{0:3d} ({1:8.3f}): ".format(deg_set[0] + 1, self._freqs[deg_set[0]])
             if self._ir_labels is None:
                 print(text)
             else:
@@ -1057,7 +1057,7 @@ class IrReps:
         
         for i, (deg_set, irrep_Rs) in enumerate(zip(self._degenerate_sets,
                                                     self._irreps)):
-            print("%3d (%8.3f):" % (deg_set[0] + 1, self._freqs[deg_set[0]]))
+            print("{0:3d} ({1:8.3f}):".format(deg_set[0] + 1, self._freqs[deg_set[0]]))
             print('')
             for j, irrep_R in enumerate(irrep_Rs):
                 for k in range(len(irrep_R)):
@@ -1074,14 +1074,14 @@ class IrReps:
                             sign_i = "-"
 
                         if k == 0:
-                            str_index = "%2d" % (j + 1)
+                            str_index = "{0:2d}".format((j + 1))
                         else:
                             str_index = "  "
                             
                         if l > 0:
                             str_index = ''
 
-                        text += "%s (%s%5.3f %s%5.3fi) " % (
+                        text += "{0!s} ({1!s}{2:5.3f} {3!s}{4:5.3f}i) ".format(
                             str_index,
                             sign_r, abs(irrep_R[k][l].real),
                             sign_i, abs(irrep_R[k][l].imag))
@@ -1093,38 +1093,38 @@ class IrReps:
 
     def _write_yaml(self, show_irreps):
         w = open("irreps.yaml", 'w')
-        w.write("q-position: [ %12.7f, %12.7f, %12.7f ]\n" % tuple(self._q))
-        w.write("point_group: %s\n" % self._pointgroup_symbol)
+        w.write("q-position: [ {0:12.7f}, {1:12.7f}, {2:12.7f} ]\n".format(*tuple(self._q)))
+        w.write("point_group: {0!s}\n".format(self._pointgroup_symbol))
         w.write("transformation_matrix:\n")
         for v in self._transformation_matrix:
-            w.write("- [ %10.7f, %10.7f, %10.7f ]\n" % tuple(v))
+            w.write("- [ {0:10.7f}, {1:10.7f}, {2:10.7f} ]\n".format(*tuple(v)))
         w.write("rotations:\n")
         for i, r in enumerate(self._conventional_rotations):
             w.write("- matrix:\n")
             for v in r:
-                w.write("  - [ %2d, %2d, %2d ]\n" % tuple(v))
+                w.write("  - [ {0:2d}, {1:2d}, {2:2d} ]\n".format(*tuple(v)))
             if self._rotation_symbols:
-                w.write("  symbol: %s\n" % self._rotation_symbols[i])
+                w.write("  symbol: {0!s}\n".format(self._rotation_symbols[i]))
         w.write("normal_modes:\n")
         for i, deg_set in enumerate(self._degenerate_sets):
             w.write("- band_indices: [ ")
-            w.write("%d" % (deg_set[0] + 1))
+            w.write("{0:d}".format((deg_set[0] + 1)))
             for bi in deg_set[1:]:
-                w.write(", %d" % (bi + 1))
+                w.write(", {0:d}".format((bi + 1)))
             w.write(" ]\n")
-            w.write("  frequency: %-15.10f\n" % self._freqs[deg_set[0]])
+            w.write("  frequency: {0:<15.10f}\n".format(self._freqs[deg_set[0]]))
             if self._ir_labels:
-                w.write("  ir_label: %s\n" % self._ir_labels[i])
+                w.write("  ir_label: {0!s}\n".format(self._ir_labels[i]))
             w.write("  characters: ")
             chars = np.rint(np.abs(self._characters[i]))
             phase = (np.angle(self._characters[i]) / np.pi * 180) % 360
             if len(chars) > 1:
-                w.write("[ [ %2d, %5.1f ]" % (chars[0], phase[0]))
+                w.write("[ [ {0:2d}, {1:5.1f} ]".format(chars[0], phase[0]))
                 for chi, theta in zip(chars[1:], phase[1:]):
-                    w.write(", [ %2d, %5.1f ]" % (chi, theta))
+                    w.write(", [ {0:2d}, {1:5.1f} ]".format(chi, theta))
                 w.write(" ]\n")
             else:
-                w.write("[ [ %2d, %5.1f ] ]\n" % (chars[0], phase[0]))
+                w.write("[ [ {0:2d}, {1:5.1f} ] ]\n".format(chars[0], phase[0]))
 
         if show_irreps:
             self._write_yaml_irreps(w)
@@ -1140,28 +1140,26 @@ class IrReps:
         w.write("irreps:\n")
         for i, (deg_set, irrep_Rs) in enumerate(
             zip(self._degenerate_sets, self._irreps)):
-            w.write("- # %d\n" % (i + 1))
+            w.write("- # {0:d}\n".format((i + 1)))
             for j, irrep_R in enumerate(irrep_Rs):
                 if self._rotation_symbols:
                     symbol = self._rotation_symbols[j]
                 else:
                     symbol = ''
                 if len(deg_set) > 1:
-                    w.write("  - # %d %s\n" % (j + 1, symbol))
+                    w.write("  - # {0:d} {1!s}\n".format(j + 1, symbol))
                     for k, v in enumerate(irrep_R):
                         w.write("    - [ ")
                         for x in v[:-1]:
-                            w.write("%10.7f, %10.7f,   " % (x.real, x.imag))
-                        w.write("%10.7f, %10.7f ] # (" %
-                                (v[-1].real, v[-1].imag))
+                            w.write("{0:10.7f}, {1:10.7f},   ".format(x.real, x.imag))
+                        w.write("{0:10.7f}, {1:10.7f} ] # (".format(v[-1].real, v[-1].imag))
                         
                         w.write(("%5.0f" * len(v)) %
                                 tuple((np.angle(v) / np.pi * 180) % 360))
                         w.write(")\n")
                 else:
                     x = irrep_R[0][0]
-                    w.write("  - [ [ %10.7f, %10.7f ] ] # (%3.0f) %d %s\n" %
-                            (x.real, x.imag,
+                    w.write("  - [ [ {0:10.7f}, {1:10.7f} ] ] # ({2:3.0f}) {3:d} {4!s}\n".format(x.real, x.imag,
                              (np.angle(x) / np.pi * 180) % 360, j + 1, symbol))
                 
         pass
@@ -1186,7 +1184,7 @@ def print_characters(characters, width=6):
             angle = 0
         else:
             val = np.rint(val)
-        text += "(%2d, %5.1f) " % (val, angle)
+        text += "({0:2d}, {1:5.1f}) ".format(val, angle)
         if ((i + 1) % width == 0 and i != 0) or (len(characters) == i + 1):
             print("    " + text)
             text = ""
@@ -1209,14 +1207,14 @@ def print_rotations(rotations,
                 rot_symbol = rotation_symbols[i * width + k]
                 if translations is None:
                     if len(rot_symbol) < 3:
-                        text += "    %2s    " % rot_symbol
+                        text += "    {0:2!s}    ".format(rot_symbol)
                     else:
-                        text += "   %4s   " % rot_symbol
+                        text += "   {0:4!s}   ".format(rot_symbol)
                 else:
                     if len(rot_symbol) < 3:
-                        text += "       %2s        " % rot_symbol
+                        text += "       {0:2!s}        ".format(rot_symbol)
                     else:
-                        text += "     %4s      " % rot_symbol
+                        text += "     {0:4!s}      ".format(rot_symbol)
             print(text)
         if translations is None:
             print(" -------- " * width)
@@ -1226,9 +1224,9 @@ def print_rotations(rotations,
         for j in range(3):
             text = ""
             for k in range(width):
-                text += " %2d %2d %2d " % tuple(rotations[i * width + k][j])
+                text += " {0:2d} {1:2d} {2:2d} ".format(*tuple(rotations[i * width + k][j]))
                 if translations is not None:
-                    text += "%5.2f " % translations[i * width + k][j]
+                    text += "{0:5.2f} ".format(translations[i * width + k][j])
             print(text)
         print('')
     
@@ -1243,9 +1241,9 @@ def print_rotations(rotations,
             for k in range(num_rest):
                 rot_symbol = rotation_symbols[i * width + k]
                 if len(rot_symbol) < 3:
-                    text += "    %2s    " % rot_symbol
+                    text += "    {0:2!s}    ".format(rot_symbol)
                 else:
-                    text += "   %4s   " % rot_symbol
+                    text += "   {0:4!s}   ".format(rot_symbol)
             print(text)
         print(" -------- " * num_rest)
         for j in range(3):

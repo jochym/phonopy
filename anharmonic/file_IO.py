@@ -6,31 +6,31 @@ from phonopy.interface.vasp import get_forces_from_vasprun_xmls
 def write_cell_yaml(w, supercell):
     w.write("lattice:\n")
     for axis in supercell.get_cell():
-        w.write("- [ %20.15f,%20.15f,%20.15f ]\n" % tuple(axis))
+        w.write("- [ {0:20.15f},{1:20.15f},{2:20.15f} ]\n".format(*tuple(axis)))
     symbols = supercell.get_chemical_symbols()
     positions = supercell.get_scaled_positions()
     w.write("atoms:\n")
     for i, (s, v) in enumerate(zip(symbols, positions)):
-        w.write("- symbol: %-2s # %d\n" % (s, i+1))
-        w.write("  position: [ %18.14f,%18.14f,%18.14f ]\n" % tuple(v))
+        w.write("- symbol: {0:<2!s} # {1:d}\n".format(s, i+1))
+        w.write("  position: [ {0:18.14f},{1:18.14f},{2:18.14f} ]\n".format(*tuple(v)))
 
 def write_disp_fc4_yaml(dataset, supercell, filename='disp_fc4.yaml'):
     w = open(filename, 'w')
-    w.write("natom: %d\n" %  dataset['natom'])
+    w.write("natom: {0:d}\n".format(dataset['natom']))
 
     num_first = len(dataset['first_atoms'])
-    w.write("num_first_displacements: %d\n" %  num_first)
+    w.write("num_first_displacements: {0:d}\n".format(num_first))
 
     num_second = 0
     for d1 in dataset['first_atoms']:
         num_second += len(d1['second_atoms'])
-    w.write("num_second_displacements: %d\n" %  num_second)
+    w.write("num_second_displacements: {0:d}\n".format(num_second))
 
     num_third = 0
     for d1 in dataset['first_atoms']:
         for d2 in d1['second_atoms']:
             num_third += len(d2['third_atoms'])
-    w.write("num_third_displacements: %d\n" %  num_third)
+    w.write("num_third_displacements: {0:d}\n".format(num_third))
 
     w.write("first_atoms:\n")
     count1 = 1
@@ -38,29 +38,26 @@ def write_disp_fc4_yaml(dataset, supercell, filename='disp_fc4.yaml'):
     count3 = num_first + num_second + 1
     for disp1 in dataset['first_atoms']:
         disp_cart1 = disp1['displacement']
-        w.write("- number: %5d\n" % (disp1['number'] + 1))
+        w.write("- number: {0:5d}\n".format((disp1['number'] + 1)))
         w.write("  displacement:\n")
-        w.write("    [%20.16f,%20.16f,%20.16f ] # %05d\n" %
-                (disp_cart1[0], disp_cart1[1], disp_cart1[2], count1))
+        w.write("    [{0:20.16f},{1:20.16f},{2:20.16f} ] # {3:05d}\n".format(disp_cart1[0], disp_cart1[1], disp_cart1[2], count1))
         w.write("  second_atoms:\n")
         count1 += 1
         for disp2 in disp1['second_atoms']:
-            w.write("  - number: %5d\n" % (disp2['number'] + 1))
+            w.write("  - number: {0:5d}\n".format((disp2['number'] + 1)))
             w.write("    displacement:\n")
             disp_cart2 = disp2['displacement']
-            w.write("      [%20.16f,%20.16f,%20.16f ] # %05d\n" %
-                    (disp_cart2[0], disp_cart2[1], disp_cart2[2], count2))
+            w.write("      [{0:20.16f},{1:20.16f},{2:20.16f} ] # {3:05d}\n".format(disp_cart2[0], disp_cart2[1], disp_cart2[2], count2))
             w.write("    third_atoms:\n")
             count2 += 1
             atom3 = -1
             for disp3 in disp2['third_atoms']:
                 if atom3 != disp3['number']:
                     atom3 = disp3['number']
-                    w.write("    - number: %5d\n" % (atom3 + 1))
+                    w.write("    - number: {0:5d}\n".format((atom3 + 1)))
                     w.write("      displacements:\n")
                 disp_cart3 = disp3['displacement']
-                w.write("      - [%20.16f,%20.16f,%20.16f ] # %05d\n" %
-                        (disp_cart3[0], disp_cart3[1], disp_cart3[2], count3))
+                w.write("      - [{0:20.16f},{1:20.16f},{2:20.16f} ] # {3:05d}\n".format(disp_cart3[0], disp_cart3[1], disp_cart3[2], count3))
                 count3 += 1
 
     write_cell_yaml(w, supercell)
@@ -71,12 +68,12 @@ def write_disp_fc4_yaml(dataset, supercell, filename='disp_fc4.yaml'):
 
 def write_disp_fc3_yaml(dataset, supercell, filename='disp_fc3.yaml'):
     w = open(filename, 'w')
-    w.write("natom: %d\n" %  dataset['natom'])
+    w.write("natom: {0:d}\n".format(dataset['natom']))
 
     num_first = len(dataset['first_atoms'])
-    w.write("num_first_displacements: %d\n" %  num_first)
+    w.write("num_first_displacements: {0:d}\n".format(num_first))
     if 'cutoff_distance' in dataset:
-        w.write("cutoff_distance: %f\n" %  dataset['cutoff_distance'])
+        w.write("cutoff_distance: {0:f}\n".format(dataset['cutoff_distance']))
 
     num_second = 0
     num_disp_files = 0
@@ -90,18 +87,17 @@ def write_disp_fc3_yaml(dataset, supercell, filename='disp_fc3.yaml'):
             else:
                 num_disp_files += 1
                 
-    w.write("num_second_displacements: %d\n" %  num_second)
-    w.write("num_displacements_created: %d\n" %  num_disp_files)
+    w.write("num_second_displacements: {0:d}\n".format(num_second))
+    w.write("num_displacements_created: {0:d}\n".format(num_disp_files))
 
     w.write("first_atoms:\n")
     count1 = 1
     count2 = num_first + 1
     for disp1 in dataset['first_atoms']:
         disp_cart1 = disp1['displacement']
-        w.write("- number: %5d\n" % (disp1['number'] + 1))
+        w.write("- number: {0:5d}\n".format((disp1['number'] + 1)))
         w.write("  displacement:\n")
-        w.write("    [%20.16f,%20.16f,%20.16f ] # %05d\n" %
-                (disp_cart1[0], disp_cart1[1], disp_cart1[2], count1))
+        w.write("    [{0:20.16f},{1:20.16f},{2:20.16f} ] # {3:05d}\n".format(disp_cart1[0], disp_cart1[1], disp_cart1[2], count1))
         w.write("  second_atoms:\n")
         count1 += 1
 
@@ -114,18 +110,17 @@ def write_disp_fc3_yaml(dataset, supercell, filename='disp_fc3.yaml'):
                 if 'included' in disp2:
                     included = disp2['included']
                 pair_distance = disp2['pair_distance']
-                w.write("  - number: %5d\n" % (atom2 + 1))
-                w.write("    distance: %f\n" % pair_distance)
+                w.write("  - number: {0:5d}\n".format((atom2 + 1)))
+                w.write("    distance: {0:f}\n".format(pair_distance))
                 if included is not None:
                     if included:
-                        w.write("    included: %s\n" % "true")
+                        w.write("    included: {0!s}\n".format("true"))
                     else:
-                        w.write("    included: %s\n" % "false")
+                        w.write("    included: {0!s}\n".format("false"))
                 w.write("    displacements:\n")
                 
             disp_cart2 = disp2['displacement']
-            w.write("    - [%20.16f,%20.16f,%20.16f ] # %05d\n" %
-                    (disp_cart2[0], disp_cart2[1], disp_cart2[2], count2))
+            w.write("    - [{0:20.16f},{1:20.16f},{2:20.16f} ] # {3:05d}\n".format(disp_cart2[0], disp_cart2[1], disp_cart2[2], count2))
             count2 += 1
 
     write_cell_yaml(w, supercell)
@@ -136,17 +131,16 @@ def write_disp_fc3_yaml(dataset, supercell, filename='disp_fc3.yaml'):
 
 def write_disp_fc2_yaml(dataset, supercell, filename='disp_fc2.yaml'):
     w = open(filename, 'w')
-    w.write("natom: %d\n" %  dataset['natom'])
+    w.write("natom: {0:d}\n".format(dataset['natom']))
 
     num_first = len(dataset['first_atoms'])
-    w.write("num_first_displacements: %d\n" %  num_first)
+    w.write("num_first_displacements: {0:d}\n".format(num_first))
     w.write("first_atoms:\n")
     for i, disp1 in enumerate(dataset['first_atoms']):
         disp_cart1 = disp1['displacement']
-        w.write("- number: %5d\n" % (disp1['number'] + 1))
+        w.write("- number: {0:5d}\n".format((disp1['number'] + 1)))
         w.write("  displacement:\n")
-        w.write("    [%20.16f,%20.16f,%20.16f ] # %05d\n" %
-                (disp_cart1[0], disp_cart1[1], disp_cart1[2], i + 1))
+        w.write("    [{0:20.16f},{1:20.16f},{2:20.16f} ] # {3:05d}\n".format(disp_cart1[0], disp_cart1[1], disp_cart1[2], i + 1))
 
     write_cell_yaml(w, supercell)
 
@@ -191,15 +185,15 @@ def write_FORCES_FC2(disp_dataset,
         w = fp
         
     for i, disp1 in enumerate(disp_dataset['first_atoms']):
-        w.write("# File: %-5d\n" % (i + 1))
-        w.write("# %-5d " % (disp1['number'] + 1))
-        w.write("%20.16f %20.16f %20.16f\n" % tuple(disp1['displacement']))
+        w.write("# File: {0:<5d}\n".format((i + 1)))
+        w.write("# {0:<5d} ".format((disp1['number'] + 1)))
+        w.write("{0:20.16f} {1:20.16f} {2:20.16f}\n".format(*tuple(disp1['displacement'])))
         if forces_fc2 is None:
             force_set = disp1['forces']
         else:
             force_set = forces_fc2[i]
         for forces in force_set:
-            w.write("%15.10f %15.10f %15.10f\n" % tuple(forces))
+            w.write("{0:15.10f} {1:15.10f} {2:15.10f}\n".format(*tuple(forces)))
     
 def write_FORCES_FC3(disp_dataset, forces_fc3, fp=None, filename="FORCES_FC3"):
     if fp is None:
@@ -218,11 +212,11 @@ def write_FORCES_FC3(disp_dataset, forces_fc3, fp=None, filename="FORCES_FC3"):
         atom1 = disp1['number']
         for disp2 in disp1['second_atoms']:
             atom2 = disp2['number']
-            w.write("# File: %-5d\n" % (count + 1))
-            w.write("# %-5d " % (atom1 + 1))
-            w.write("%20.16f %20.16f %20.16f\n" % tuple(disp1['displacement']))
-            w.write("# %-5d " % (atom2 + 1))
-            w.write("%20.16f %20.16f %20.16f\n" % tuple(disp2['displacement']))
+            w.write("# File: {0:<5d}\n".format((count + 1)))
+            w.write("# {0:<5d} ".format((atom1 + 1)))
+            w.write("{0:20.16f} {1:20.16f} {2:20.16f}\n".format(*tuple(disp1['displacement'])))
+            w.write("# {0:<5d} ".format((atom2 + 1)))
+            w.write("{0:20.16f} {1:20.16f} {2:20.16f}\n".format(*tuple(disp2['displacement'])))
 
             # For supercell calculation reduction
             included = True
@@ -230,13 +224,13 @@ def write_FORCES_FC3(disp_dataset, forces_fc3, fp=None, filename="FORCES_FC3"):
                 included = disp2['included']
             if included:
                 for forces in forces_fc3[file_count]:
-                    w.write("%15.10f %15.10f %15.10f\n" % tuple(forces))
+                    w.write("{0:15.10f} {1:15.10f} {2:15.10f}\n".format(*tuple(forces)))
                 file_count += 1
             else:
                 # for forces in forces_fc3[i]:
                 #     w.write("%15.10f %15.10f %15.10f\n" % (tuple(forces)))
                 for j in range(natom):
-                    w.write("%15.10f %15.10f %15.10f\n" % (0, 0, 0))
+                    w.write("{0:15.10f} {1:15.10f} {2:15.10f}\n".format(0, 0, 0))
             count += 1
 
 def write_FORCES_FC4(disp_dataset, forces_fc4, fp=None, filename="FORCES_FC4"):
@@ -260,18 +254,18 @@ def write_FORCES_FC4(disp_dataset, forces_fc4, fp=None, filename="FORCES_FC4"):
             atom2 = disp2['number']
             for disp3 in disp2['third_atoms']:
                 atom3 = disp3['number']
-                w.write("# File: %-5d\n" % (count + 1))
-                w.write("# %-5d " % (atom1 + 1))
-                w.write("%20.16f %20.16f %20.16f\n" %
-                        tuple(disp1['displacement']))
-                w.write("# %-5d " % (atom2 + 1))
-                w.write("%20.16f %20.16f %20.16f\n" %
-                        tuple(disp2['displacement']))
-                w.write("# %-5d " % (atom3 + 1))
-                w.write("%20.16f %20.16f %20.16f\n" %
-                        tuple(disp3['displacement']))
+                w.write("# File: {0:<5d}\n".format((count + 1)))
+                w.write("# {0:<5d} ".format((atom1 + 1)))
+                w.write("{0:20.16f} {1:20.16f} {2:20.16f}\n".format(*
+                        tuple(disp1['displacement'])))
+                w.write("# {0:<5d} ".format((atom2 + 1)))
+                w.write("{0:20.16f} {1:20.16f} {2:20.16f}\n".format(*
+                        tuple(disp2['displacement'])))
+                w.write("# {0:<5d} ".format((atom3 + 1)))
+                w.write("{0:20.16f} {1:20.16f} {2:20.16f}\n".format(*
+                        tuple(disp3['displacement'])))
                 for forces in forces_fc4[count]:
-                    w.write("%15.10f %15.10f %15.10f\n" % tuple(forces))
+                    w.write("{0:15.10f} {1:15.10f} {2:15.10f}\n".format(*tuple(forces)))
                 count += 1
             
 def write_fc3_yaml(force_constants_third,
@@ -286,13 +280,12 @@ def write_fc3_yaml(force_constants_third,
                     tensor3 = symmetrize_fc3(force_constants_third, i, j, k)
                 else:
                     tensor3 = force_constants_third[i, j, k]
-                w.write("- index: [ %d - %d - %d ] # (%f)\n" \
-                               % (i+1, j+1, k+1, tensor3.sum()))
+                w.write("- index: [ {0:d} - {1:d} - {2:d} ] # ({3:f})\n".format(i+1, j+1, k+1, tensor3.sum()))
                 w.write("  tensor:\n")
                 for tensor2 in tensor3:
                     w.write("  -\n")
                     for vec in tensor2:
-                        w.write("    - [ %13.8f, %13.8f, %13.8f ]\n" % tuple(vec))
+                        w.write("    - [ {0:13.8f}, {1:13.8f}, {2:13.8f} ]\n".format(*tuple(vec)))
                 w.write("\n")
 
 def write_fc3_dat(force_constants_third, filename='fc3.dat'):
@@ -301,23 +294,23 @@ def write_fc3_dat(force_constants_third, filename='fc3.dat'):
         for j in range(force_constants_third.shape[1]):
             for k in range(force_constants_third.shape[2]):
                 tensor3 = force_constants_third[i, j, k]
-                w.write(" %d - %d - %d  (%f)\n" % (i + 1, j + 1, k + 1,
+                w.write(" {0:d} - {1:d} - {2:d}  ({3:f})\n".format(i + 1, j + 1, k + 1,
                                                    np.abs(tensor3).sum()))
                 for tensor2 in tensor3:
                     for vec in tensor2:
-                        w.write("%20.14f %20.14f %20.14f\n" % tuple(vec))
+                        w.write("{0:20.14f} {1:20.14f} {2:20.14f}\n".format(*tuple(vec)))
                     w.write("\n")
 
 def write_fc4_dat(fc4, filename='fc4.dat'):
     w = open(filename, 'w')
     for (i, j, k, l) in list(np.ndindex(fc4.shape[:4])):
         tensor4 = fc4[i, j, k, l]
-        w.write(" %d - %d - %d - %d (%f)\n" % (i + 1, j + 1, k + 1, l + 1,
+        w.write(" {0:d} - {1:d} - {2:d} - {3:d} ({4:f})\n".format(i + 1, j + 1, k + 1, l + 1,
                                                np.abs(tensor4).sum()))
         for tensor3 in tensor4:
             for tensor2 in tensor3:
                 for vec in tensor2:
-                    w.write("%20.14f %20.14f %20.14f\n" % tuple(vec))
+                    w.write("{0:20.14f} {1:20.14f} {2:20.14f}\n".format(*tuple(vec)))
                 w.write("\n")
             w.write("\n")
         w.write("\n")
@@ -348,9 +341,9 @@ def write_fc2_dat(force_constants, filename='fc2.dat'):
     w = open(filename, 'w')
     for i, fcs in enumerate(force_constants):
         for j, fcb in enumerate(fcs):
-            w.write(" %d - %d\n" % (i+1, j+1))
+            w.write(" {0:d} - {1:d}\n".format(i+1, j+1))
             for vec in fcb:
-                w.write("%20.14f %20.14f %20.14f\n" % tuple(vec))
+                w.write("{0:20.14f} {1:20.14f} {2:20.14f}\n".format(*tuple(vec)))
             w.write("\n")
 
 def write_fc2_to_hdf5(force_constants, filename='fc2.hdf5'):
@@ -376,40 +369,39 @@ def write_triplets(triplets,
                    grid_point=None,
                    filename=None):
     triplets_filename = "triplets"
-    suffix = "-m%d%d%d" % tuple(mesh)
+    suffix = "-m{0:d}{1:d}{2:d}".format(*tuple(mesh))
     if grid_point is not None:
-        suffix += ("-g%d" % grid_point)
+        suffix += ("-g{0:d}".format(grid_point))
     if filename is not None:
         suffix += "." + filename
     suffix += ".dat"
     triplets_filename += suffix
     w = open(triplets_filename, 'w')
     for weight, g3 in zip(weights, triplets):
-        w.write("%4d    " % weight)
+        w.write("{0:4d}    ".format(weight))
         for q3 in grid_address[g3]:
-            w.write("%4d %4d %4d    " % tuple(q3))
+            w.write("{0:4d} {1:4d} {2:4d}    ".format(*tuple(q3)))
         w.write("\n")
     w.close()
 
 def write_grid_address(grid_address, mesh, filename=None):
     grid_address_filename = "grid_address"
-    suffix = "-m%d%d%d" % tuple(mesh)
+    suffix = "-m{0:d}{1:d}{2:d}".format(*tuple(mesh))
     if filename is not None:
         suffix += "." + filename
     suffix += ".dat"
     grid_address_filename += suffix
     
     w = open(grid_address_filename, 'w')
-    w.write("# Grid addresses for %dx%dx%d mesh\n" % tuple(mesh))
-    w.write("#%9s    %8s %8s %8s     %8s %8s %8s\n" %
-            ("index", "a", "b", "c",
-             ("a%%%d" % mesh[0]), ("b%%%d" % mesh[1]), ("c%%%d" % mesh[2])))
+    w.write("# Grid addresses for {0:d}x{1:d}x{2:d} mesh\n".format(*tuple(mesh)))
+    w.write("#{0:9!s}    {1:8!s} {2:8!s} {3:8!s}     {4:8!s} {5:8!s} {6:8!s}\n".format("index", "a", "b", "c",
+             ("a%{0:d}".format(mesh[0])), ("b%{0:d}".format(mesh[1])), ("c%{0:d}".format(mesh[2]))))
     for i, bz_q in enumerate(grid_address):
         if i == np.prod(mesh):
             w.write("#" + "-" * 78 + "\n")
         q = bz_q % mesh
-        w.write("%10d    %8d %8d %8d     " % (i, bz_q[0], bz_q[1], bz_q[2]))
-        w.write("%8d %8d %8d\n" % tuple(q))
+        w.write("{0:10d}    {1:8d} {2:8d} {3:8d}     ".format(i, bz_q[0], bz_q[1], bz_q[2]))
+        w.write("{0:8d} {1:8d} {2:8d}\n".format(*tuple(q)))
 
     return grid_address_filename
 
@@ -439,31 +431,31 @@ def write_imag_self_energy_at_grid_point(gp,
                                          is_nosym=False):
 
     gammas_filename = "gammas"
-    gammas_filename += "-m%d%d%d-g%d-" % (mesh[0],
+    gammas_filename += "-m{0:d}{1:d}{2:d}-g{3:d}-".format(mesh[0],
                                           mesh[1],
                                           mesh[2],
                                           gp)
     if sigma is not None:
-        gammas_filename += ("s%f" % sigma).rstrip('0').rstrip('\.') + "-"
+        gammas_filename += ("s{0:f}".format(sigma)).rstrip('0').rstrip('\.') + "-"
 
     if temperature is not None:
-        gammas_filename += ("t%f" % temperature).rstrip('0').rstrip('\.') + "-"
+        gammas_filename += ("t{0:f}".format(temperature)).rstrip('0').rstrip('\.') + "-"
 
     for i in band_indices:
-        gammas_filename += "b%d" % (i + 1)
+        gammas_filename += "b{0:d}".format((i + 1))
 
     if scattering_event_class is not None:
-        gammas_filename += "-c%d" % scattering_event_class
+        gammas_filename += "-c{0:d}".format(scattering_event_class)
 
     if not filename == None:
-        gammas_filename += ".%s" % filename
+        gammas_filename += ".{0!s}".format(filename)
     elif is_nosym:
         gammas_filename += ".nosym"
     gammas_filename += ".dat"
 
     w = open(gammas_filename, 'w')
     for freq, g in zip(frequencies, gammas):
-        w.write("%15.7f %20.15e\n" % (freq, g))
+        w.write("{0:15.7f} {1:20.15e}\n".format(freq, g))
     w.close()
 
 def write_joint_dos(gp,
@@ -502,20 +494,20 @@ def _write_joint_dos_at_t(gp,
                           temperature=None,
                           filename=None,
                           is_nosym=False):
-    jdos_filename = "jdos-m%d%d%d-g%d" % (mesh[0], mesh[1], mesh[2], gp)
+    jdos_filename = "jdos-m{0:d}{1:d}{2:d}-g{3:d}".format(mesh[0], mesh[1], mesh[2], gp)
     if sigma is not None:
-        jdos_filename += ("-s%f" % sigma).rstrip('0').rstrip('\.')
+        jdos_filename += ("-s{0:f}".format(sigma)).rstrip('0').rstrip('\.')
     if temperature is not None:
-        jdos_filename += ("-t%f" % temperature).rstrip('0').rstrip('\.')
+        jdos_filename += ("-t{0:f}".format(temperature)).rstrip('0').rstrip('\.')
     if is_nosym:
         jdos_filename += ".nosym"
     if filename is not None:
-        jdos_filename += ".%s" % filename
+        jdos_filename += ".{0!s}".format(filename)
     jdos_filename += ".dat" 
         
     w = open(jdos_filename, 'w')
     for omega, vals in zip(frequencies, jdos):
-        w.write("%15.7f" % omega)
+        w.write("{0:15.7f}".format(omega))
         w.write((" %20.15e" * len(vals)) % tuple(vals))
         w.write("\n")
     w.close()
@@ -530,22 +522,22 @@ def write_linewidth_at_grid_point(gp,
                                   filename=None):
 
     lw_filename = "linewidth"
-    lw_filename += "-m%d%d%d-g%d-" % (mesh[0], mesh[1], mesh[2], gp)
+    lw_filename += "-m{0:d}{1:d}{2:d}-g{3:d}-".format(mesh[0], mesh[1], mesh[2], gp)
     if sigma is not None:
-        lw_filename += ("s%f" % sigma).rstrip('0') + "-"
+        lw_filename += ("s{0:f}".format(sigma)).rstrip('0') + "-"
 
     for i in band_indices:
-        lw_filename += "b%d" % (i + 1)
+        lw_filename += "b{0:d}".format((i + 1))
 
     if not filename == None:
-        lw_filename += ".%s" % filename
+        lw_filename += ".{0!s}".format(filename)
     elif is_nosym:
         lw_filename += ".nosym"
     lw_filename += ".dat"
 
     w = open(lw_filename, 'w')
     for v, t in zip(gamma.sum(axis=1) * 2 / gamma.shape[1], temperatures):
-        w.write("%15.7f %20.15e\n" % (t, v))
+        w.write("{0:15.7f} {1:20.15e}\n".format(t, v))
     w.close()
 
 def write_frequency_shift(gp,
@@ -558,23 +550,23 @@ def write_frequency_shift(gp,
                           filename=None):
 
     fst_filename = "frequency_shift"
-    fst_filename += "-m%d%d%d-g%d-" % (mesh[0], mesh[1], mesh[2], gp)
+    fst_filename += "-m{0:d}{1:d}{2:d}-g{3:d}-".format(mesh[0], mesh[1], mesh[2], gp)
     if epsilon is not None:
         if epsilon > 1e-5:
-            fst_filename += ("s%f" % epsilon).rstrip('0') + "-"
+            fst_filename += ("s{0:f}".format(epsilon)).rstrip('0') + "-"
         else:
-            fst_filename += ("s%.3e" % epsilon) + "-"
+            fst_filename += ("s{0:.3e}".format(epsilon)) + "-"
     for i in band_indices:
-        fst_filename += "b%d" % (i + 1)
+        fst_filename += "b{0:d}".format((i + 1))
     if not filename == None:
-        fst_filename += ".%s" % filename
+        fst_filename += ".{0!s}".format(filename)
     elif is_nosym:
         fst_filename += ".nosym"
     fst_filename += ".dat"
 
     w = open(fst_filename, 'w')
     for v, t in zip(delta.sum(axis=1) / delta.shape[1], temperatures):
-        w.write("%15.7f %20.15e\n" % (t, v))
+        w.write("{0:15.7f} {1:20.15e}\n".format(t, v))
     w.close()
     
 def write_collision_to_hdf5(temperature,
@@ -585,11 +577,11 @@ def write_collision_to_hdf5(temperature,
                             grid_point=None,
                             sigma=None,
                             filename=None):
-    suffix = "-m%d%d%d" % tuple(mesh)
+    suffix = "-m{0:d}{1:d}{2:d}".format(*tuple(mesh))
     if grid_point is not None:
-        suffix += ("-g%d" % grid_point)
+        suffix += ("-g{0:d}".format(grid_point))
     if sigma is not None:
-        sigma_str = ("%f" % sigma).rstrip('0').rstrip('\.')
+        sigma_str = ("{0:f}".format(sigma)).rstrip('0').rstrip('\.')
         suffix += "-s" + sigma_str
     if filename is not None:
         suffix += "." + filename
@@ -605,15 +597,15 @@ def write_collision_to_hdf5(temperature,
 
     text = "Collisions "
     if grid_point is not None:
-        text += "at grid adress %d " % grid_point
+        text += "at grid adress {0:d} ".format(grid_point)
     if sigma is not None:
         if grid_point is not None:
             text += "and "
         else:
             text += "at "
-        text += "sigma %s " % sigma_str
+        text += "sigma {0!s} ".format(sigma_str)
     text += "were written into \n"
-    text += "\"%s\"" % ("collision" + suffix + ".hdf5")
+    text += "\"{0!s}\"".format(("collision" + suffix + ".hdf5"))
     print(text)
     print('')
 
@@ -681,21 +673,21 @@ def write_kappa_to_hdf5(temperature,
         else:
             text += "Thermal conductivity related properties "
         if grid_point is not None:
-            text += "at gp-%d " % grid_point
+            text += "at gp-{0:d} ".format(grid_point)
             if band_index is not None:
-                text += "and band_index-%d\n" % (band_index + 1)
+                text += "and band_index-{0:d}\n".format((band_index + 1))
         if sigma is not None:
             if grid_point is not None:
                 text += "and "
             else:
                 text += "at "
-            text += "sigma %s\n" % sigma
+            text += "sigma {0!s}\n".format(sigma)
             text += "were written into "
         else:
             text += "were written into "
             if band_index is None:
                 text += "\n"
-        text += "\"%s\"" % ("kappa" + suffix + ".hdf5")
+        text += "\"{0!s}\"".format(("kappa" + suffix + ".hdf5"))
         print(text)
 
 def write_collision_eigenvalues_to_hdf5(temperatures,
@@ -715,9 +707,9 @@ def write_collision_eigenvalues_to_hdf5(temperatures,
     if verbose:
         text = "Eigenvalues of collision matrix "
         if sigma is not None:
-            text += "with sigma %s\n" % sigma
+            text += "with sigma {0!s}\n".format(sigma)
         text += "were written into "
-        text += "\"%s\"" % ("coleigs" + suffix + ".hdf5")
+        text += "\"{0!s}\"".format(("coleigs" + suffix + ".hdf5"))
         print(text)
 
 def read_gamma_from_hdf5(mesh,
@@ -739,7 +731,7 @@ def read_gamma_from_hdf5(mesh,
                                   filename=filename)
     if not os.path.exists("kappa" + suffix + ".hdf5"):
         if verbose:
-            print("%s not found." % ("kappa" + suffix + ".hdf5"))
+            print("{0!s} not found.".format(("kappa" + suffix + ".hdf5")))
             return False
         
     with h5py.File("kappa" + suffix + ".hdf5", 'r') as f:
@@ -763,7 +755,7 @@ def read_gamma_from_hdf5(mesh,
             averaged_pp_interaction = None
     
     if verbose:
-        print("Read data from %s." % ("kappa" + suffix + ".hdf5"))
+        print("Read data from {0!s}.".format(("kappa" + suffix + ".hdf5")))
     
     return gamma, gamma_isotope, averaged_pp_interaction
 
@@ -772,11 +764,11 @@ def read_collision_from_hdf5(mesh,
                              sigma=None,
                              filename=None,
                              verbose=True):
-    suffix = "-m%d%d%d" % tuple(mesh)
+    suffix = "-m{0:d}{1:d}{2:d}".format(*tuple(mesh))
     if grid_point is not None:
-        suffix += ("-g%d" % grid_point)
+        suffix += ("-g{0:d}".format(grid_point))
     if sigma is not None:
-        sigma_str = ("%f" % sigma).rstrip('0').rstrip('\.')
+        sigma_str = ("{0:f}".format(sigma)).rstrip('0').rstrip('\.')
         suffix += "-s" + sigma_str
     if filename is not None:
         suffix += "." + filename
@@ -793,17 +785,17 @@ def read_collision_from_hdf5(mesh,
     if verbose:
         text = "Collisions "
         if grid_point is not None:
-            text += "at grid adress %d " % grid_point
+            text += "at grid adress {0:d} ".format(grid_point)
         if sigma is not None:
             if grid_point is not None:
                 text += "and "
             else:
                 text += "at "
-            text += "sigma %s " % sigma_str
+            text += "sigma {0!s} ".format(sigma_str)
         text += "were read from "
         if grid_point is not None:
             text += "\n"
-        text += "%s" % ("collision" + suffix + ".hdf5")
+        text += "{0!s}".format(("collision" + suffix + ".hdf5"))
         print(text)
     
     return collision_matrix, gamma, temperatures
@@ -815,8 +807,8 @@ def write_amplitude_to_hdf5(amplitude,
                             weight=None,
                             frequency=None,
                             eigenvector=None):
-    suffix = "-m%d%d%d" % tuple(mesh)
-    suffix += ("-g%d" % grid_point)
+    suffix = "-m{0:d}{1:d}{2:d}".format(*tuple(mesh))
+    suffix += ("-g{0:d}".format(grid_point))
     w = h5py.File("amplitude" + suffix + ".hdf5", 'w')
     w.create_dataset('amplitude', data=amplitude)
     if triplet is not None:
@@ -832,8 +824,8 @@ def write_amplitude_to_hdf5(amplitude,
 def read_amplitude_from_hdf5(amplitudes_at_q,
                              mesh,
                              grid_point):
-    suffix = "-m%d%d%d" % tuple(mesh)
-    suffix += ("-g%d" % grid_point)
+    suffix = "-m{0:d}{1:d}{2:d}".format(*tuple(mesh))
+    suffix += ("-g{0:d}".format(grid_point))
     f = h5py.File("amplitude" + suffix + ".hdf5", 'r')
     amplitudes_at_q[:] = f['amplitudes'][:]
 
@@ -871,22 +863,22 @@ def write_ir_grid_points(mesh,
                          grid_address,
                          primitive_lattice):
     w = open("ir_grid_points.yaml", 'w')
-    w.write("mesh: [ %d, %d, %d ]\n" % tuple(mesh))
+    w.write("mesh: [ {0:d}, {1:d}, {2:d} ]\n".format(*tuple(mesh)))
     if mesh_divs is not None:
-        w.write("mesh_divisors: [ %d, %d, %d ]\n" % tuple(mesh_divs))
+        w.write("mesh_divisors: [ {0:d}, {1:d}, {2:d} ]\n".format(*tuple(mesh_divs)))
     w.write("reciprocal_lattice:\n")
     for vec, axis in zip(primitive_lattice.T, ('a*', 'b*', 'c*')):
-        w.write("- [ %12.8f, %12.8f, %12.8f ] # %2s\n" % (tuple(vec) + (axis,)))
-    w.write("num_reduced_ir_grid_points: %d\n" % len(grid_points))
+        w.write("- [ {0:12.8f}, {1:12.8f}, {2:12.8f} ] # {3:2!s}\n".format(*(tuple(vec) + (axis,))))
+    w.write("num_reduced_ir_grid_points: {0:d}\n".format(len(grid_points)))
     w.write("ir_grid_points:  # [address, weight]\n")
 
     for g, weight in zip(grid_points, coarse_grid_weights):
-        w.write("- grid_point: %d\n" % g)
-        w.write("  weight: %d\n" % weight)
-        w.write("  grid_address: [ %12d, %12d, %12d ]\n" %
-                tuple(grid_address[g]))
-        w.write("  q-point:      [ %12.7f, %12.7f, %12.7f ]\n" %
-                tuple(grid_address[g].astype('double') / mesh))
+        w.write("- grid_point: {0:d}\n".format(g))
+        w.write("  weight: {0:d}\n".format(weight))
+        w.write("  grid_address: [ {0:12d}, {1:12d}, {2:12d} ]\n".format(*
+                tuple(grid_address[g])))
+        w.write("  q-point:      [ {0:12.7f}, {1:12.7f}, {2:12.7f} ]\n".format(*
+                tuple(grid_address[g].astype('double') / mesh)))
 
 def parse_disp_fc2_yaml(filename="disp_fc2.yaml"):
     dataset = _parse_yaml(filename)
@@ -1088,18 +1080,18 @@ def _get_filename_suffix(mesh,
                          band_indices=None,
                          sigma=None,
                          filename=None):
-    suffix = "-m%d%d%d" % tuple(mesh)
+    suffix = "-m{0:d}{1:d}{2:d}".format(*tuple(mesh))
     if mesh_divisors is not None:
         if (np.array(mesh_divisors, dtype=int) != 1).any():
-            suffix += "-d%d%d%d" % tuple(mesh_divisors)
+            suffix += "-d{0:d}{1:d}{2:d}".format(*tuple(mesh_divisors))
     if grid_point is not None:
-        suffix += ("-g%d" % grid_point)
+        suffix += ("-g{0:d}".format(grid_point))
     if band_indices is not None:
         suffix += "-"
         for bi in band_indices:
-            suffix += "b%d" % (bi + 1)
+            suffix += "b{0:d}".format((bi + 1))
     if sigma is not None:
-        sigma_str = ("%f" % sigma).rstrip('0').rstrip('\.')
+        sigma_str = ("{0:f}".format(sigma)).rstrip('0').rstrip('\.')
         suffix += "-s" + sigma_str
     if filename is not None:
         suffix += "." + filename

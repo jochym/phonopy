@@ -108,26 +108,25 @@ def print_cell(cell, mapping=None, stars=None):
     magmoms = cell.get_magnetic_moments()
     lattice = cell.get_cell()
     print("Lattice vectors:")
-    print("  a %20.15f %20.15f %20.15f" % tuple(lattice[0]))
-    print("  b %20.15f %20.15f %20.15f" % tuple(lattice[1]))
-    print("  c %20.15f %20.15f %20.15f" % tuple(lattice[2]))
+    print("  a {0:20.15f} {1:20.15f} {2:20.15f}".format(*tuple(lattice[0])))
+    print("  b {0:20.15f} {1:20.15f} {2:20.15f}".format(*tuple(lattice[1])))
+    print("  c {0:20.15f} {1:20.15f} {2:20.15f}".format(*tuple(lattice[2])))
     print("Atomic positions (fractional):")
     for i, v in enumerate(cell.get_scaled_positions()):
         num = " "
         if stars is not None:
             if i in stars:
                 num = "*"
-        num += "%d" % (i + 1)
-        line = ("%5s %-2s%18.14f%18.14f%18.14f" % 
-                (num, symbols[i], v[0], v[1], v[2]))
+        num += "{0:d}".format((i + 1))
+        line = ("{0:5!s} {1:<2!s}{2:18.14f}{3:18.14f}{4:18.14f}".format(num, symbols[i], v[0], v[1], v[2]))
         if masses is not None:
-            line += " %7.3f" % masses[i]
+            line += " {0:7.3f}".format(masses[i])
         if magmoms is not None:
-            line += "  %5.3f" % magmoms[i]
+            line += "  {0:5.3f}".format(magmoms[i])
         if mapping is None:
             print(line)
         else:
-            print(line + " > %d" % (mapping[i] + 1))
+            print(line + " > {0:d}".format((mapping[i] + 1)))
 
 class Supercell(Atoms):
     """Build supercell from supercell matrix

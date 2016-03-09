@@ -203,13 +203,12 @@ class PhonopyAtoms(Atoms):
         lines = []
         lines.append("lattice:")
         for v, a in zip(self.cell, ('a', 'b', 'c')):
-            lines.append("- [ %22.16f, %22.16f, %22.16f ] # %s" %
-                         (v[0], v[1], v[2], a))
+            lines.append("- [ {0:22.16f}, {1:22.16f}, {2:22.16f} ] # {3!s}".format(v[0], v[1], v[2], a))
         lines.append("points:")
         for i, (s, v) in enumerate(zip(self.symbols, self.scaled_positions)):
-            lines.append("- symbol: %-2s # %d" % (s, i + 1))
-            lines.append("  coordinates: [ %19.16f, %19.16f, %19.16f ]" %
-                         tuple(v))
+            lines.append("- symbol: {0:<2!s} # {1:d}".format(s, i + 1))
+            lines.append("  coordinates: [ {0:19.16f}, {1:19.16f}, {2:19.16f} ]".format(*
+                         tuple(v)))
         return "\n".join(lines)
 
 atom_data = [ 

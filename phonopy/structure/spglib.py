@@ -170,9 +170,9 @@ def get_spacegroup(bulk, symprec=1e-5, angle_tolerance=-1.0, symbol_type=0):
     symbols = spg.spacegroup_type(dataset['hall_number'])
 
     if symbol_type == 1:
-        return "%s (%d)" % (symbols[0], dataset['number'])
+        return "{0!s} ({1:d})".format(symbols[0], dataset['number'])
     else:
-        return "%s (%d)" % (symbols[4], dataset['number'])
+        return "{0!s} ({1:d})".format(symbols[4], dataset['number'])
 
 def get_pointgroup(rotations):
     """

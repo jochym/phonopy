@@ -127,39 +127,38 @@ class BandStructure:
         nqpoint = 0
         for qpoints in self._paths:
             nqpoint += len(qpoints)
-        w.write("nqpoint: %-7d\n" % nqpoint)
-        w.write("npath: %-7d\n" % len(self._paths))
-        w.write("natom: %-7d\n" % (natom))
+        w.write("nqpoint: {0:<7d}\n".format(nqpoint))
+        w.write("npath: {0:<7d}\n".format(len(self._paths)))
+        w.write("natom: {0:<7d}\n".format((natom)))
         w.write("reciprocal_lattice:\n")
         for vec, axis in zip(lattice.T, ('a*', 'b*', 'c*')):
-            w.write("- [ %12.8f, %12.8f, %12.8f ] # %2s\n" %
-                    (tuple(vec) + (axis,)))
+            w.write("- [ {0:12.8f}, {1:12.8f}, {2:12.8f} ] # {3:2!s}\n".format(*
+                    (tuple(vec) + (axis,))))
         w.write("phonon:\n")
         for i, (qpoints, distances, frequencies) in enumerate(zip(
             self._paths,
             self._distances,
             self._frequencies)):
              for j, q in enumerate(qpoints):
-                w.write("- q-position: [ %12.7f, %12.7f, %12.7f ]\n" % tuple(q))
-                w.write("  distance: %12.7f\n" % distances[j])
+                w.write("- q-position: [ {0:12.7f}, {1:12.7f}, {2:12.7f} ]\n".format(*tuple(q)))
+                w.write("  distance: {0:12.7f}\n".format(distances[j]))
                 w.write("  band:\n")
                 for k, freq in enumerate(frequencies[j]):
-                    w.write("  - # %d\n" % (k + 1))
-                    w.write("    frequency: %15.10f\n" % freq)
+                    w.write("  - # {0:d}\n".format((k + 1)))
+                    w.write("    frequency: {0:15.10f}\n".format(freq))
     
                     if self._group_velocity is not None:
                         gv = self._group_velocities[i][j, k]
                         w.write("    group_velocity: ")
-                        w.write("[ %13.7f, %13.7f, %13.7f ]\n" % tuple(gv))
+                        w.write("[ {0:13.7f}, {1:13.7f}, {2:13.7f} ]\n".format(*tuple(gv)))
                         
                     if self._is_eigenvectors:
                         eigenvectors = self._eigenvectors[i]
                         w.write("    eigenvector:\n")
                         for l in range(natom):
-                            w.write("    - # atom %d\n" % (l + 1))
+                            w.write("    - # atom {0:d}\n".format((l + 1)))
                             for m in (0, 1, 2):
-                                w.write("      - [ %17.14f, %17.14f ]\n" %
-                                        (eigenvectors[j, l * 3 + m, k].real,
+                                w.write("      - [ {0:17.14f}, {1:17.14f} ]\n".format(eigenvectors[j, l * 3 + m, k].real,
                                          eigenvectors[j, l * 3 + m, k].imag))
 
                         

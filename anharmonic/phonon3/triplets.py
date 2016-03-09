@@ -34,7 +34,7 @@ def get_triplets_at_q(grid_point,
         mesh)
 
     assert np.prod(mesh) == weights.sum(), \
-        "Num grid points %d, sum of weight %d" % (
+        "Num grid points {0:d}, sum of weight {1:d}".format(
                     np.prod(mesh), weights.sum())
 
     # These maps are required for collision matrix calculation.

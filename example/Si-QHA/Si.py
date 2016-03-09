@@ -16,8 +16,8 @@ def get_frequency(poscar_filename, force_sets_filename):
 frequencies = []
 volumes = []
 for i in range(-10, 6):
-    poscar_filename = "POSCAR-%d" % i
-    force_sets_filename = "FORCE_SETS-%d" % i
+    poscar_filename = "POSCAR-{0:d}".format(i)
+    force_sets_filename = "FORCE_SETS-{0:d}".format(i)
     fs, v = get_frequency(poscar_filename, force_sets_filename)
     frequencies.append(fs)
     volumes.append(v)

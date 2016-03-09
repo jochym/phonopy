@@ -210,11 +210,11 @@ class QHA:
     def write_helmholtz_volume(self, filename='helmholtz-volume.dat'):
         w = open(filename, 'w')
         for i in range(self._max_t_index):
-            w.write("# Temperature: %f\n" % self._temperatures[i])
-            w.write("# Parameters: %f %f %f %f\n" %
-                    tuple(self._equiv_parameters[i]))
+            w.write("# Temperature: {0:f}\n".format(self._temperatures[i]))
+            w.write("# Parameters: {0:f} {1:f} {2:f} {3:f}\n".format(*
+                    tuple(self._equiv_parameters[i])))
             for j, v in enumerate(self._volumes):
-                w.write("%20.15f %25.15f\n" % (v, self._free_energies[i][j]))
+                w.write("{0:20.15f} {1:25.15f}\n".format(v, self._free_energies[i][j]))
             w.write("\n\n")
         w.close()
 
@@ -248,7 +248,7 @@ class QHA:
     def write_volume_temperature(self, filename='volume-temperature.dat'):
         w = open(filename, 'w')
         for i in range(self._max_t_index):
-            w.write("%25.15f %25.15f\n" % (self._temperatures[i],
+            w.write("{0:25.15f} {1:25.15f}\n".format(self._temperatures[i],
                                            self._equiv_volumes[i]))
         w.close()
 
@@ -280,7 +280,7 @@ class QHA:
     def write_thermal_expansion(self, filename='thermal_expansion.dat'):
         w = open(filename, 'w')
         for i in range(self._max_t_index):
-            w.write("%25.15f %25.15f\n" % (self._temperatures[i],
+            w.write("{0:25.15f} {1:25.15f}\n".format(self._temperatures[i],
                                            self._thermal_expansions[i]))
         w.close()
 
@@ -326,7 +326,7 @@ class QHA:
         if self._temperatures[self._max_t_index] > 300:
             w = open(filename, 'w')
             for i in range(self._max_t_index):
-                w.write("%20.15f %25.15f\n" % (self._temperatures[i],
+                w.write("{0:20.15f} {1:25.15f}\n".format(self._temperatures[i],
                                                self._volume_expansions[i]))
             w.close()
 
@@ -362,7 +362,7 @@ class QHA:
     def write_gibbs_temperature(self, filename='gibbs-temperature.dat'):
         w = open(filename, 'w')
         for i in range(self._max_t_index):
-            w.write("%20.15f %25.15f\n" % (self._temperatures[i],
+            w.write("{0:20.15f} {1:25.15f}\n".format(self._temperatures[i],
                                            self._equiv_energies[i]))
         w.close()
 
@@ -404,7 +404,7 @@ class QHA:
                                        filename='bulk_modulus-temperature.dat'):
         w = open(filename, 'w')
         for i in range(self._max_t_index):
-            w.write("%20.15f %25.15f\n" % (self._temperatures[i],
+            w.write("{0:20.15f} {1:25.15f}\n".format(self._temperatures[i],
                                            self._equiv_bulk_modulus[i]))
         w.close()
 
@@ -438,7 +438,7 @@ class QHA:
     def write_heat_capacity_P_numerical(self, filename='Cp-temperature.dat'):
         w = open(filename, 'w')
         for i in range(self._max_t_index):
-            w.write("%20.15f %20.15f\n" % (self._temperatures[i],
+            w.write("{0:20.15f} {1:20.15f}\n".format(self._temperatures[i],
                                            self._cp_numerical[i]))
         w.close()
 
@@ -479,16 +479,16 @@ class QHA:
         wvcv = open(filename_cvv, 'w')
         for i in range(1, self._max_t_index):
             t = self._temperatures[i]
-            wve.write("# temperature %20.15f\n" % t)
-            wve.write("# %20.15f %20.15f %20.15f %20.15f %20.15f\n" %
-                      tuple(self._volume_cv_parameters[i - 1]))
-            wvcv.write("# temperature %20.15f\n" % t)
-            wvcv.write("# %20.15f %20.15f %20.15f %20.15f %20.15f\n" %
-                       tuple(self._volume_entropy_parameters[i - 1]))
+            wve.write("# temperature {0:20.15f}\n".format(t))
+            wve.write("# {0:20.15f} {1:20.15f} {2:20.15f} {3:20.15f} {4:20.15f}\n".format(*
+                      tuple(self._volume_cv_parameters[i - 1])))
+            wvcv.write("# temperature {0:20.15f}\n".format(t))
+            wvcv.write("# {0:20.15f} {1:20.15f} {2:20.15f} {3:20.15f} {4:20.15f}\n".format(*
+                       tuple(self._volume_entropy_parameters[i - 1])))
             for ve, vcv in zip(self._volume_entropy[i - 1],
                                self._volume_cv[i - 1]):
-                wve.write("%20.15f %20.15f\n" % tuple(ve))
-                wvcv.write("%20.15f %20.15f\n" % tuple(vcv))
+                wve.write("{0:20.15f} {1:20.15f}\n".format(*tuple(ve)))
+                wvcv.write("{0:20.15f} {1:20.15f}\n".format(*tuple(vcv)))
             wve.write("\n\n")
             wvcv.write("\n\n")
         wve.close()
@@ -496,13 +496,13 @@ class QHA:
 
         w = open(filename, 'w')
         for i in range(self._max_t_index):
-            w.write("%20.15f %20.15f\n" % (self._temperatures[i],
+            w.write("{0:20.15f} {1:20.15f}\n".format(self._temperatures[i],
                                            self._cp_polyfit[i]))
         w.close()
 
         w = open(filename_dsdvt, 'w') # GPa
         for i in range(self._max_t_index):
-            w.write("%20.15f %20.15f\n" % (self._temperatures[i],
+            w.write("{0:20.15f} {1:20.15f}\n".format(self._temperatures[i],
                                            self._dsdv[i] * 1e21 / Avogadro))
         w.close()
 
@@ -535,7 +535,7 @@ class QHA:
     def write_gruneisen_temperature(self, filename='gruneisen-temperature.dat'):
         w = open(filename, 'w')
         for i in range(self._max_t_index):
-            w.write("%20.15f %25.15f\n" % (self._temperatures[i],
+            w.write("{0:20.15f} {1:25.15f}\n".format(self._temperatures[i],
                                            self._gruneisen_parameters[i]))
         w.close()
 
@@ -566,7 +566,7 @@ class QHA:
         for i, j in enumerate((0, thin_index)):
             plt.text(self._volumes[-2],
                      self._free_energies[j][-1] + (1 - i * 2) * 0.1 - 0.05,
-                     "%dK" % int(self._temperatures[j]),
+                     "{0:d}K".format(int(self._temperatures[j])),
                      fontsize=8)
 
         plt.plot(selected_volumes,

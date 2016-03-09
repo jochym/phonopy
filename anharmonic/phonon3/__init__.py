@@ -233,8 +233,8 @@ class Phono3py:
         # Set fc3 elements zero beyond cutoff_distance
         if cutoff_distance:
             if self._log_level:
-                print("Cutting-off fc3 by zero (cut-off distance: %f)" %
-                      cutoff_distance)
+                print("Cutting-off fc3 by zero (cut-off distance: {0:f})".format(
+                      cutoff_distance))
             self.cutoff_fc3_by_zero(cutoff_distance)
 
         # Set fc2
@@ -659,17 +659,17 @@ class Phono3pyIsotope:
             self._iso.set_grid_point(gp)
 
             print("--------------- Isotope scattering ---------------")
-            print("Grid point: %d" % gp)
+            print("Grid point: {0:d}".format(gp))
             adrs = self._iso.get_grid_address()[gp]
             q = adrs.astype('double') / self._mesh
-            print("q-point: %s" % q)
+            print("q-point: {0!s}".format(q))
             
             if self._sigmas:
                 for sigma in self._sigmas:
                     if sigma is None:
                         print("Tetrahedron method")
                     else:
-                        print("Sigma: %s" % sigma)
+                        print("Sigma: {0!s}".format(sigma))
                     self._iso.set_sigma(sigma)
                     self._iso.run()
 
@@ -678,7 +678,7 @@ class Phono3pyIsotope:
                     print("Phonon-isotope scattering rate in THz (1/4pi-tau)")
                     print(" Frequency     Rate")
                     for g, f in zip(self._iso.get_gamma(), frequencies[gp]):
-                        print("%8.3f     %5.3e" % (f, g))
+                        print("{0:8.3f}     {1:5.3e}".format(f, g))
             else:
                 print("sigma or tetrahedron method has to be set.")
 
@@ -768,22 +768,22 @@ class Phono3pyJointDos:
                 weights = self._jdos.get_triplets_at_q()[1]
                 print("--------------------------------- Joint DOS "
                       "---------------------------------")
-                print("Grid point: %d" % gp)
+                print("Grid point: {0:d}".format(gp))
                 print("Number of ir-triplets: "
                       "%d / %d" % (len(weights), weights.sum()))
                 adrs = self._jdos.get_grid_address()[gp]
                 q = adrs.astype('double') / self._mesh
-                print("q-point: %s" % q)
+                print("q-point: {0!s}".format(q))
                 print("Phonon frequency:")
                 frequencies = self._jdos.get_phonons()[0]
-                print("%s" % frequencies[gp])
+                print("{0!s}".format(frequencies[gp]))
             
             if self._sigmas:
                 for sigma in self._sigmas:
                     if sigma is None:
                         print("Tetrahedron method")
                     else:
-                        print("Sigma: %s" % sigma)
+                        print("Sigma: {0!s}".format(sigma))
                     self._jdos.set_sigma(sigma)
                     self._jdos.run()
                     self._write(gp, sigma=sigma)

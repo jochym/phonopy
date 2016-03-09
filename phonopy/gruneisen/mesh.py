@@ -104,20 +104,20 @@ class Mesh:
 
     def write_yaml(self, filename="gruneisen.yaml"):
         f = open(filename, 'w')
-        f.write("mesh: [ %5d, %5d, %5d ]\n" % tuple(self._mesh))
-        f.write("nqpoint: %d\n" % len(self._qpoints))
+        f.write("mesh: [ {0:5d}, {1:5d}, {2:5d} ]\n".format(*tuple(self._mesh)))
+        f.write("nqpoint: {0:d}\n".format(len(self._qpoints)))
         f.write("phonon:\n")
         for q, w, gs, freqs in zip(self._qpoints,
                                    self._weights,
                                    self._gamma,
                                    self._frequencies):
-            f.write("- q-position: [ %10.7f, %10.7f, %10.7f ]\n" % tuple(q))
-            f.write("  multiplicity: %d\n" % w)
+            f.write("- q-position: [ {0:10.7f}, {1:10.7f}, {2:10.7f} ]\n".format(*tuple(q)))
+            f.write("  multiplicity: {0:d}\n".format(w))
             f.write("  band:\n")
             for j, (g, freq) in enumerate(zip(gs, freqs)):
-                f.write("  - # %d\n" % (j + 1))
-                f.write("    gruneisen: %15.10f\n" % g)
-                f.write("    frequency: %15.10f\n" % freq)
+                f.write("  - # {0:d}\n".format((j + 1)))
+                f.write("    gruneisen: {0:15.10f}\n".format(g))
+                f.write("    frequency: {0:15.10f}\n".format(freq))
             f.write("\n")
         f.close()
 

@@ -206,7 +206,7 @@ class Conductivity:
                 if sigma is None:
                     text += "tetrahedron method"
                 else:
-                    text += "sigma=%s" % sigma
+                    text += "sigma={0!s}".format(sigma)
                 print(text)
             pp_freqs, pp_eigvecs, pp_phonon_done = self._pp.get_phonons()
             self._isotope.set_sigma(sigma)
@@ -250,8 +250,8 @@ class Conductivity:
         self._coarse_mesh = self._mesh // self._mesh_divisors
 
         if self._log_level:
-            print("Lifetime sampling mesh: [ %d %d %d ]" %
-                  tuple(self._mesh // self._mesh_divisors))
+            print("Lifetime sampling mesh: [ {0:d} {1:d} {2:d} ]".format(*
+                  tuple(self._mesh // self._mesh_divisors)))
 
     def _get_ir_grid_points(self):
         if self._coarse_mesh_shifts is None:
@@ -341,14 +341,14 @@ class Conductivity:
             print("======================= Grid point %d (%d/%d) "
                   "=======================" %
                   (gp, i + 1, len(self._grid_points)))
-            print("q-point: (%5.2f %5.2f %5.2f)" % tuple(self._qpoints[i]))
+            print("q-point: ({0:5.2f} {1:5.2f} {2:5.2f})".format(*tuple(self._qpoints[i])))
             if self._boundary_mfp is not None:
                 if self._boundary_mfp > 1000:
-                    print("Boundary mean free path (millimetre): %.3f" %
-                          (self._boundary_mfp / 1000.0))
+                    print("Boundary mean free path (millimetre): {0:.3f}".format(
+                          (self._boundary_mfp / 1000.0)))
                 else:
-                    print("Boundary mean free path (micrometre): %.5f" %
-                          self._boundary_mfp)
+                    print("Boundary mean free path (micrometre): {0:.5f}".format(
+                          self._boundary_mfp))
             if self._is_isotope:
                 print(("Mass variance parameters: " +
                        "%5.2e " * len(self._mass_variances)) %

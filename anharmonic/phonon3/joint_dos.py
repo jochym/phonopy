@@ -115,7 +115,7 @@ class JointDos:
             self._frequencies = np.zeros((num_grid, num_band), dtype='double')
             itemsize = self._frequencies.itemsize
             self._eigenvectors = np.zeros((num_grid, num_band, num_band),
-                                          dtype=("c%d" % (itemsize * 2)))
+                                          dtype=("c{0:d}".format((itemsize * 2))))
             
         self._joint_dos = None
         self._frequency_points = None

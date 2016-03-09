@@ -65,7 +65,7 @@ def parse_set_of_forces(num_atoms,
                 _iterparse(forces_filenames[0], tag='varray'))
 
         if verbose:
-            sys.stdout.write("%d " % (count + 1))
+            sys.stdout.write("{0:d} ".format((count + 1)))
         count += 1
             
         if not _check_forces(zero_forces, num_atoms, forces_filenames[0]):
@@ -85,7 +85,7 @@ def parse_set_of_forces(num_atoms,
             force_sets[-1] -= zero_forces
 
         if verbose:
-            sys.stdout.write("%d " % (count + 1))
+            sys.stdout.write("{0:d} ".format((count + 1)))
         count += 1
         
         if not _check_forces(force_sets[-1], num_atoms, filename):
@@ -101,8 +101,8 @@ def parse_set_of_forces(num_atoms,
 
 def _check_forces(forces, num_atom, filename):
     if len(forces) != num_atom:
-        sys.stdout.write(" \"%s\" does not contain necessary information. " %
-                         filename)
+        sys.stdout.write(" \"{0!s}\" does not contain necessary information. ".format(
+                         filename))
         return False
     else:
         return True
@@ -111,7 +111,7 @@ def create_FORCE_CONSTANTS(filename, options, log_level):
     fc_and_atom_types = read_force_constant_vasprun_xml(filename)
     if not fc_and_atom_types:
         print('')
-        print("\'%s\' dones not contain necessary information." % filename)
+        print("\'{0!s}\' dones not contain necessary information.".format(filename))
         return 1
 
     force_constants, atom_types = fc_and_atom_types
@@ -234,7 +234,7 @@ def write_supercells_with_displacements(supercell,
                                         cells_with_displacements):
     write_vasp("SPOSCAR", supercell, direct=True)
     for i, cell in enumerate(cells_with_displacements):
-        write_vasp('POSCAR-%03d' % (i + 1), cell, direct=True)
+        write_vasp('POSCAR-{0:03d}'.format((i + 1)), cell, direct=True)
 
     _write_magnetic_moments(supercell)
 
@@ -249,7 +249,7 @@ def _write_magnetic_moments(cell):
                                                 cell.get_scaled_positions())
         w.write(" MAGMOM = ")
         for i in sort_list:
-            w.write("%f " % magmoms[i])
+            w.write("{0:f} ".format(magmoms[i]))
         w.write("\n")
         w.close()
                 
@@ -257,10 +257,10 @@ def get_scaled_positions_lines(scaled_positions):
     lines = ""
     for i, vec in enumerate(scaled_positions):
         for x in (vec - np.rint(vec)):
-            if float('%20.16f' % x) < 0.0:
-                lines += "%20.16f" % (x + 1.0)
+            if float('{0:20.16f}'.format(x)) < 0.0:
+                lines += "{0:20.16f}".format((x + 1.0))
             else:
-                lines += "%20.16f" % (x)
+                lines += "{0:20.16f}".format((x))
         if i < len(scaled_positions) - 1:
             lines += "\n"
 
@@ -287,11 +287,11 @@ def _get_vasp_structure(atoms, direct=True):
                                             atoms.get_scaled_positions())
     lines = ""     
     for s in symbols:
-        lines += "%s " % s
+        lines += "{0!s} ".format(s)
     lines += "\n"
     lines += "   1.0\n"
     for a in atoms.get_cell():
-        lines += "  %21.16f %21.16f %21.16f\n" % tuple(a)
+        lines += "  {0:21.16f} {1:21.16f} {2:21.16f}\n".format(*tuple(a))
     lines += ("%4d " * len(num_atoms)) % tuple(num_atoms)
     lines += "\n"
     lines += "Direct\n"
@@ -496,7 +496,7 @@ def get_force_constants_vasprun_xml(vasprun):
 def get_forces_from_vasprun_xmls(vaspruns, num_atom, index_shift=0):
     forces = []
     for i, vasprun in enumerate(vaspruns):
-        sys.stderr.write("%d " % (i + 1 + index_shift))
+        sys.stderr.write("{0:d} ".format((i + 1 + index_shift)))
 
         if _is_version528(vasprun):
             force_set = _get_forces_vasprun_xml(
@@ -507,7 +507,7 @@ def get_forces_from_vasprun_xmls(vaspruns, num_atom, index_shift=0):
         if force_set.shape[0] == num_atom:
             forces.append(force_set)
         else:
-            print("\nNumber of forces in vasprun.xml #%d is wrong." % (i + 1))
+            print("\nNumber of forces in vasprun.xml #{0:d} is wrong.".format((i + 1)))
             sys.exit(1)
             
     sys.stderr.wrong("\n")
@@ -516,7 +516,7 @@ def get_forces_from_vasprun_xmls(vaspruns, num_atom, index_shift=0):
 def get_force_constants_from_vasprun_xmls(vasprun_filenames):
     force_constants_set = []
     for i, filename in enumerate(vasprun_filenames):
-        sys.stderr.write("%d: %s\n" % (i + 1, filename))
+        sys.stderr.write("{0:d}: {1!s}\n".format(i + 1, filename))
         force_constants_set.append(
             read_force_constant_vasprun_xml(filename)[0])
     sys.stderr.write("\n")
@@ -614,5 +614,5 @@ def get_force_constants_OUTCAR(filename):
 if __name__ == '__main__':
     import sys
     atoms = read_vasp(sys.argv[1])
-    write_vasp('%s-new' % sys.argv[1], atoms)
+    write_vasp('{0!s}-new'.format(sys.argv[1]), atoms)
 

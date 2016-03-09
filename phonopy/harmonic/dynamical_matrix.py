@@ -197,16 +197,14 @@ class DynamicalMatrix:
         r = self._smallest_vectors
         m = self._multiplicity
 
-        print("#%4s %4s %4s %4s %4s %10s" % 
-              ("p_i", "p_j", "s_i", "s_j", "mult", "dist"))
+        print("#{0:4!s} {1:4!s} {2:4!s} {3:4!s} {4:4!s} {5:10!s}".format("p_i", "p_j", "s_i", "s_j", "mult", "dist"))
         for p_i, s_i in enumerate(self._p2s_map): # run in primitive
             for s_j in range(r.shape[0]): # run in supercell
                 for tmp_p_j, tmp_s_j in enumerate(self._p2s_map):
                     if self._s2p_map[s_j] == tmp_s_j:
                         p_j = tmp_p_j
                 for k in range(m[s_j][p_i]):
-                    print(" %4d %4d %4d %4d %4d %10.5f" %
-                          (p_i+1, p_j+1, s_i+1, s_j+1, m[s_j][p_i],
+                    print(" {0:4d} {1:4d} {2:4d} {3:4d} {4:4d} {5:10.5f}".format(p_i+1, p_j+1, s_i+1, s_j+1, m[s_j][p_i],
                            np.linalg.norm(np.dot(r[s_j][p_i][k],
                                                  self._pcell.get_cell()))))
 
@@ -220,7 +218,7 @@ class DynamicalMatrix:
         size_prim = len(mass)
         itemsize = self._force_constants.itemsize
         dm = np.zeros((size_prim * 3, size_prim * 3),
-                      dtype=("c%d" % (itemsize * 2)))
+                      dtype=("c{0:d}".format((itemsize * 2))))
         phonoc.dynamical_matrix(dm.view(dtype='double'),
                                 fc,
                                 np.array(q, dtype='double'),
@@ -367,7 +365,7 @@ class DynamicalMatrixNAC(DynamicalMatrix):
         size_prim = len(mass)
         itemsize = self._force_constants.itemsize
         dm = np.zeros((size_prim * 3, size_prim * 3),
-                      dtype=("c%d" % (itemsize * 2)))
+                      dtype=("c{0:d}".format((itemsize * 2))))
         phonoc.nac_dynamical_matrix(dm.view(dtype='double'),
                                     fc,
                                     np.array(q_red, dtype='double'),

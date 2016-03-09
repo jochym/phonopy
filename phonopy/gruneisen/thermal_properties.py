@@ -64,7 +64,7 @@ class ThermalProperties:
 
     def write_yaml(self, filename='thermal_properties'):
         for i, tp in enumerate(self._thermal_properties):
-            tp.write_yaml(filename="%s-%02d.yaml" % (filename, i))
+            tp.write_yaml(filename="{0!s}-{1:02d}.yaml".format(filename, i))
 
     def _get_thermal_properties_at_V(self, V):
         frequencies = self._get_frequencies_at_V(V)

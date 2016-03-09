@@ -97,11 +97,11 @@ def get_least_displacements(symmetry,
         site_symmetry = symmetry.get_site_symmetry(atom_num)
 
         if log_level > 2:
-            print("Atom %d" % (atom_num + 1))
+            print("Atom {0:d}".format((atom_num + 1)))
             for i, rot in enumerate(site_symmetry):
-                print("----%d----" % (i + 1))
+                print("----{0:d}----".format((i + 1)))
                 for v in rot:
-                    print("%2d %2d %2d" % tuple(v))
+                    print("{0:2d} {1:2d} {2:2d}".format(*tuple(v)))
         
         for disp in get_displacement(site_symmetry,
                                      directions,
@@ -128,7 +128,7 @@ def get_displacement(site_symmetry,
                                              directions)
     if disp is not None:
         if log_level > 2:
-            print("Site symmetry used to expand a direction %s" % disp[0])
+            print("Site symmetry used to expand a direction {0!s}".format(disp[0]))
             print(site_symmetry[sitesym_num])
         return disp
     # Two
@@ -136,8 +136,7 @@ def get_displacement(site_symmetry,
                                               directions)
     if disps is not None:
         if log_level > 2:
-            print("Site symmetry used to expand directions %s %s" %
-                  (disps[0], disps[1]))
+            print("Site symmetry used to expand directions {0!s} {1!s}".format(disps[0], disps[1]))
             print(site_symmetry[sitesym_num])
 
         if is_trigonal:
@@ -220,5 +219,5 @@ def print_displacements(symmetry,
     print("Atom       Directions")
     print("----------------------------")
     for key in displacements:
-        print("%4d  %s" % (key + 1, displacements[key]))
+        print("{0:4d}  {1!s}".format(key + 1, displacements[key]))
 

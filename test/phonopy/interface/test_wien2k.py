@@ -25,7 +25,7 @@ class TestWien2k(unittest.TestCase):
         print(symmetry.get_international_table())
         for i, (r, t) in enumerate(
                 zip(sym_op['rotations'], sym_op['translations'])):
-            print("--- %d ---" % (i + 1))
+            print("--- {0:d} ---".format((i + 1)))
             print(r)
             print(t)
 

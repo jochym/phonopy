@@ -21,7 +21,7 @@ class TestDynmatToFc(unittest.TestCase):
         primitive = get_primitive(supercell, pmat)
         comm_points = get_commensurate_points(primitive, supercell)
         for i, p in enumerate(comm_points):
-            print("%d %s" % (i + 1, p))
+            print("{0:d} {1!s}".format(i + 1, p))
 
 if __name__ == '__main__':
     unittest.main()

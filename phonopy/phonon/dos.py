@@ -41,20 +41,20 @@ def write_total_dos(frequency_points,
                     comment=None):
     fp = open('total_dos.dat', 'w')
     if comment is not None:
-        fp.write("# %s\n" % comment)
+        fp.write("# {0!s}\n".format(comment))
 
     for freq, dos in zip(frequency_points, total_dos):
-        fp.write("%20.10f%20.10f\n" % (freq, dos))
+        fp.write("{0:20.10f}{1:20.10f}\n".format(freq, dos))
 
 def write_partial_dos(frequency_points,
                       partial_dos,
                       comment=None):
     fp = open('partial_dos.dat', 'w')
     if comment is not None:
-        fp.write("# %s\n" % comment)
+        fp.write("# {0!s}\n".format(comment))
         
     for freq, pdos in zip(frequency_points, partial_dos.T):
-        fp.write("%20.10f" % freq)
+        fp.write("{0:20.10f}".format(freq))
         fp.write(("%20.10f" * len(pdos)) % tuple(pdos))
         fp.write("\n")
 
@@ -296,7 +296,7 @@ class TotalDos(Dos):
 
     def write(self):
         if self._tetrahedron_mesh is None:
-            comment = "Sigma = %f" % self._sigma
+            comment = "Sigma = {0:f}".format(self._sigma)
         else:
             comment = "Tetrahedron method"
             
@@ -407,7 +407,7 @@ class PartialDos(Dos):
     
     def write(self):
         if self._tetrahedron_mesh is None:
-            comment = "Sigma = %f" % self._sigma
+            comment = "Sigma = {0:f}".format(self._sigma)
         else:
             comment = "Tetrahedron method"
             

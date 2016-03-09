@@ -23,12 +23,12 @@ def get_gruneisen_parameters(fc2,
     if log_level:
         print("-" * 23 + " Phonon Gruneisen parameter " + "-" * 23)
         if mesh is not None:
-            print("Mesh sampling: [ %d %d %d ]" % tuple(mesh))
+            print("Mesh sampling: [ {0:d} {1:d} {2:d} ]".format(*tuple(mesh)))
         elif band_paths is not None:
             print("Paths in reciprocal reduced coordinates:")
             for path in band_paths:
-                print("[%5.2f %5.2f %5.2f] --> [%5.2f %5.2f %5.2f]" %
-                      (tuple(path[0]) + tuple(path[-1])))
+                print("[{0:5.2f} {1:5.2f} {2:5.2f}] --> [{3:5.2f} {4:5.2f} {5:5.2f}]".format(*
+                      (tuple(path[0]) + tuple(path[-1]))))
         if ion_clamped:
             print("To be calculated with ion clamped.")
             
@@ -160,25 +160,25 @@ class Gruneisen:
 
     def _write_yaml(self, f):
         if self._run_mode == 'mesh':
-            f.write("mesh: [ %5d, %5d, %5d ]\n" % tuple(self._mesh))
-        f.write("nqpoint: %d\n" % len(self._qpoints))
+            f.write("mesh: [ {0:5d}, {1:5d}, {2:5d} ]\n".format(*tuple(self._mesh)))
+        f.write("nqpoint: {0:d}\n".format(len(self._qpoints)))
         f.write("phonon:\n")
         for i, (q, g_at_q, freqs_at_q) in enumerate(
             zip(self._qpoints,
                 self._gruneisen_parameters,
                 self._frequencies)):
-            f.write("- q-position: [ %10.7f, %10.7f, %10.7f ]\n" % tuple(q))
+            f.write("- q-position: [ {0:10.7f}, {1:10.7f}, {2:10.7f} ]\n".format(*tuple(q)))
             if self._weights is not None:
-                f.write("  multiplicity: %d\n" % self._weights[i])
+                f.write("  multiplicity: {0:d}\n".format(self._weights[i]))
             f.write("  band:\n")
             for j, (g, freq) in enumerate(zip(g_at_q, freqs_at_q)):
-                f.write("  - # %d\n" % (j + 1))
-                f.write("    frequency: %15.10f\n" % freq)
-                f.write("    gruneisen: %15.10f\n" % (g.trace() / 3))
+                f.write("  - # {0:d}\n".format((j + 1)))
+                f.write("    frequency: {0:15.10f}\n".format(freq))
+                f.write("    gruneisen: {0:15.10f}\n".format((g.trace() / 3)))
                 f.write("    gruneisen_tensor:\n")
                 for g_xyz in g:
-                    f.write("    - [ %10.7f, %10.7f, %10.7f ]\n" %
-                            tuple(g_xyz))
+                    f.write("    - [ {0:10.7f}, {1:10.7f}, {2:10.7f} ]\n".format(*
+                            tuple(g_xyz)))
         
     def _write_band_yaml(self, f):
         f.write("path:\n\n")
@@ -186,22 +186,21 @@ class Gruneisen:
                                            self._band_distances,
                                            self._gruneisen_parameters,
                                            self._frequencies):
-            f.write("- nqpoint: %d\n" % len(path))
+            f.write("- nqpoint: {0:d}\n".format(len(path)))
             f.write("  phonon:\n")
             for i, (q, d, g_at_q, freqs_at_q) in enumerate(
                 zip(path, distances, gs, fs)):
-                f.write("  - q-position: [ %10.7f, %10.7f, %10.7f ]\n"
-                        % tuple(q))
-                f.write("    distance: %10.7f\n" % d)
+                f.write("  - q-position: [ {0:10.7f}, {1:10.7f}, {2:10.7f} ]\n".format(*tuple(q)))
+                f.write("    distance: {0:10.7f}\n".format(d))
                 f.write("    band:\n")
                 for j, (g, freq) in enumerate(zip(g_at_q, freqs_at_q)):
-                    f.write("    - # %d\n" % (j + 1))
-                    f.write("      frequency: %15.10f\n" % freq)
-                    f.write("      gruneisen: %15.10f\n" % (g.trace() / 3))
+                    f.write("    - # {0:d}\n".format((j + 1)))
+                    f.write("      frequency: {0:15.10f}\n".format(freq))
+                    f.write("      gruneisen: {0:15.10f}\n".format((g.trace() / 3)))
                     f.write("      gruneisen_tensor:\n")
                     for g_xyz in g:
-                        f.write("      - [ %10.7f, %10.7f, %10.7f ]\n" %
-                                tuple(g_xyz))
+                        f.write("      - [ {0:10.7f}, {1:10.7f}, {2:10.7f} ]\n".format(*
+                                tuple(g_xyz)))
                 f.write("\n")
                         
         
