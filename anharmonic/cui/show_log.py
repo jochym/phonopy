@@ -41,7 +41,7 @@ def file_exists(filename, log_level):
     if os.path.exists(filename):
         return True
     else:
-        error_text = "%s not found." % filename
+        error_text = "{0!s} not found.".format(filename)
         print(error_text)
         if log_level > 0:
             print_error()
@@ -57,7 +57,7 @@ def print_phono3py():
  |_|                                |_|    |___/ """)
 
 def print_version(version):
-    print(" " * 42 + "%s" % version)
+    print(" " * 42 + "{0!s}".format(version))
     print('')
 
 def print_end():
@@ -81,7 +81,7 @@ def show_phono3py_cells(symmetry,
                         phonon_primitive,
                         phonon_supercell,
                         settings):
-    print("Spacegroup: %s" % symmetry.get_international_table())
+    print("Spacegroup: {0!s}".format(symmetry.get_international_table()))
     print("-" * 30 + " primitive cell " + "-" * 30)
     print_cell(primitive)
     print("-" * 32 + " super cell " + "-" * 32)
@@ -111,23 +111,23 @@ def show_phono3py_force_constants_settings(read_fc3,
                                            settings):
     print("-" * 29 + " Force constants " + "-" * 30)
     if not read_fc2:
-        print("Imposing translational symmetry to fc2: %s" % 
-              (tsym_type > 0))
-        print("Imposing symmetry of index exchange to fc2: %s" %
-              is_symmetrize_fc2)
+        print("Imposing translational symmetry to fc2: {0!s}".format( 
+              (tsym_type > 0)))
+        print("Imposing symmetry of index exchange to fc2: {0!s}".format(
+              is_symmetrize_fc2))
         
     if not (read_fc3 or
             settings.get_is_isotope() or
             settings.get_is_joint_dos()):
-        print("Imposing translational symmetry to fc3: %s" %
-              (tsym_type > 0))
-        print("Imposing symmetry of index exchange to fc3 in real space: %s" %
-              is_symmetrize_fc3_r)
+        print("Imposing translational symmetry to fc3: {0!s}".format(
+              (tsym_type > 0)))
+        print("Imposing symmetry of index exchange to fc3 in real space: {0!s}".format(
+              is_symmetrize_fc3_r))
         print(("Imposing symmetry of index exchange to fc3 in reciprocal space: "
               "%s") % is_symmetrize_fc3_q)
         
     if settings.get_cutoff_fc3_distance() is not None:
-        print("FC3 cutoff distance: %s" % settings.get_cutoff_fc3_distance())
+        print("FC3 cutoff distance: {0!s}".format(settings.get_cutoff_fc3_distance()))
 
 def show_phono3py_settings(settings,
                            mesh,
@@ -144,11 +144,11 @@ def show_phono3py_settings(settings,
                            log_level):
     print("-" * 33 + " Settings " + "-" * 33)
     if settings.get_is_nac():
-        print("Non-analytical term correction: %s" % settings.get_is_nac())
+        print("Non-analytical term correction: {0!s}".format(settings.get_is_nac()))
     if mesh is not None:
-        print("Mesh sampling: [ %d %d %d ]" % tuple(mesh))
+        print("Mesh sampling: [ {0:d} {1:d} {2:d} ]".format(*tuple(mesh)))
     if mesh_divs is not None and settings.get_is_bterta():
-        print("Mesh divisors: [ %d %d %d ]" % tuple(mesh_divs))
+        print("Mesh divisors: [ {0:d} {1:d} {2:d} ]".format(*tuple(mesh_divs)))
     if band_indices is not None and not settings.get_is_bterta():
         print(("Band indices: [" + " %s" * len(band_indices) + " ]") %
               tuple([np.array(bi) + 1 for bi in band_indices]))
@@ -156,7 +156,7 @@ def show_phono3py_settings(settings,
         text = "BZ integration: "
         for i, sigma in enumerate(sigmas):
             if sigma:
-                text += "Smearing=%s" % sigma
+                text += "Smearing={0!s}".format(sigma)
             else:
                 text += "Tetrahedron-method"
             if i < len(sigmas) - 1:
@@ -169,7 +169,7 @@ def show_phono3py_settings(settings,
         settings.get_is_lbte()):
         if len(temperatures) > 5:
             text = (" %.1f " * 5 + "...") % tuple(temperatures[:5])
-            text += " %.1f" % temperatures[-1]
+            text += " {0:.1f}".format(temperatures[-1])
         else:
             text = (" %.1f " * len(temperatures)) % tuple(temperatures)
         print("Temperature: " + text)
@@ -177,8 +177,8 @@ def show_phono3py_settings(settings,
         print(("Temperatures:" + " %.1f " * len(temperature_points))
               % tuple(temperature_points))
         if settings.get_scattering_event_class() is not None:
-            print("Scattering event class: %s" %
-                  settings.get_scattering_event_class())
+            print("Scattering event class: {0!s}".format(
+                  settings.get_scattering_event_class()))
             
     if grid_points is not None:
         text = "Grid point to be calculated: "
@@ -187,24 +187,24 @@ def show_phono3py_settings(settings,
                 if i % 10 == 0:
                     text += "\n"
                     text += " "
-                text += "%d " % gp
+                text += "{0:d} ".format(gp)
         else:
             for gp in grid_points:
-                text += "%d " % gp
+                text += "{0:d} ".format(gp)
         print(text)
             
     if cutoff_frequency:
-        print("Cutoff frequency: %s" % cutoff_frequency)
+        print("Cutoff frequency: {0!s}".format(cutoff_frequency))
 
     if (settings.get_average_pp_interaction() and
         (settings.get_is_bterta() or settings.get_is_lbte())):
         print("Use averaged ph-ph interaction")
         
     if log_level > 1:
-        print("Frequency factor to THz: %s" % frequency_factor_to_THz)
+        print("Frequency factor to THz: {0!s}".format(frequency_factor_to_THz))
         if frequency_step is not None:
-            print("Frequency step for spectrum: %s" % frequency_step)
+            print("Frequency step for spectrum: {0!s}".format(frequency_step))
         if num_frequency_points is not None:
-            print("Number of frequency sampling points: %d" %
-                  num_frequency_points)
+            print("Number of frequency sampling points: {0:d}".format(
+                  num_frequency_points))
     sys.stdout.flush()

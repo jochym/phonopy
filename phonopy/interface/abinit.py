@@ -89,7 +89,7 @@ def write_supercells_with_displacements(supercell,
                                         cells_with_displacements):
     write_abinit("supercell.in", supercell)
     for i, cell in enumerate(cells_with_displacements):
-        write_abinit("supercell-%03d.in" % (i + 1), cell)
+        write_abinit("supercell-{0:03d}.in".format((i + 1)), cell)
 
 def get_abinit_structure(cell):
     znucl = []
@@ -102,10 +102,10 @@ def get_abinit_structure(cell):
         typat.append(znucl.index(n) + 1)
 
     lines = ""
-    lines += "natom %d\n" % len(numbers)
+    lines += "natom {0:d}\n".format(len(numbers))
     lines += "typat\n"
     lines += (" %d" * len(typat) + "\n") % tuple(typat)
-    lines += "ntypat %d\n" % len(znucl)
+    lines += "ntypat {0:d}\n".format(len(znucl))
     lines += ("znucl" + " %d" * len(znucl) + "\n") % tuple(znucl)
     lines += "acell 1 1 1\n"
     lines += "rprim\n"
@@ -158,7 +158,7 @@ class AbinitIn:
 
         for tag in ['natom', 'ntypat']:
             if tag not in elements:
-                print "%s is not found in the input file." % tag
+                print "{0!s} is not found in the input file.".format(tag)
                 sys.exit(1)
 
         for tag, self._values in elements.iteritems():

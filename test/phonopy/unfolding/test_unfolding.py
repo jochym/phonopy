@@ -87,8 +87,7 @@ class TestUnfolding(unittest.TestCase):
                         continue
                     for k, f in enumerate(freqs[i]):
                         uw = weights[i, k, j]
-                        lines.append("%10.7f %10.7f %10.7f  %12.7f  %10.7f" %
-                                     (q_k[0], q_k[1], q_k[2], f, uw))
+                        lines.append("{0:10.7f} {1:10.7f} {2:10.7f}  {3:12.7f}  {4:10.7f}".format(q_k[0], q_k[1], q_k[2], f, uw))
             w.write("\n".join(lines))
 
     def _get_phonon(self, cell):

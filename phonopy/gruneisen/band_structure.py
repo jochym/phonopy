@@ -87,17 +87,17 @@ class BandStructure:
              frequencies,
              distances_with_shift) = band_structure
             
-            f.write("- nqpoint: %d\n" % self._num_points)
+            f.write("- nqpoint: {0:d}\n".format(self._num_points))
             f.write("  phonon:\n")
             for q, d, gs, freqs in zip(qpoints, distances, gamma, frequencies):
-                f.write("  - q-position: [ %10.7f, %10.7f, %10.7f ]\n" %
-                        tuple(q))
-                f.write("    distance: %10.7f\n" % d)
+                f.write("  - q-position: [ {0:10.7f}, {1:10.7f}, {2:10.7f} ]\n".format(*
+                        tuple(q)))
+                f.write("    distance: {0:10.7f}\n".format(d))
                 f.write("    band:\n")
                 for i, (g, freq) in enumerate(zip(gs, freqs)):
-                    f.write("    - # %d\n" % (i + 1))
-                    f.write("      gruneisen: %15.10f\n" % g)
-                    f.write("      frequency: %15.10f\n" % freq)
+                    f.write("    - # {0:d}\n".format((i + 1)))
+                    f.write("      gruneisen: {0:15.10f}\n".format(g))
+                    f.write("      frequency: {0:15.10f}\n".format(freq))
                 f.write("\n")
                     
         f.close()

@@ -128,7 +128,7 @@ def write_supercells_with_displacements(supercell,
                                         pp_filenames):
     write_pwscf("supercell.in", supercell, pp_filenames)
     for i, cell in enumerate(cells_with_displacements):
-        write_pwscf("supercell-%03d.in" % (i + 1), cell, pp_filenames)
+        write_pwscf("supercell-{0:03d}.in".format((i + 1)), cell, pp_filenames)
 
 def get_pwscf_structure(cell, pp_filenames=None):
     lattice = cell.get_cell()
@@ -143,21 +143,20 @@ def get_pwscf_structure(cell, pp_filenames=None):
             atomic_species.append((symbol, m))
     
     lines = ""
-    lines += ("!    ibrav = 0, nat = %d, ntyp = %d\n" %
-              (len(positions), len(unique_symbols)))
+    lines += ("!    ibrav = 0, nat = {0:d}, ntyp = {1:d}\n".format(len(positions), len(unique_symbols)))
     lines += "CELL_PARAMETERS bohr\n"
     lines += ((" %21.16f" * 3 + "\n") * 3) % tuple(lattice.ravel())
     lines += "ATOMIC_SPECIES\n"
     for symbol, mass in atomic_species:
         if pp_filenames is None:
-            lines += " %2s %10.5f   %s_PP_filename\n" % (symbol, mass, symbol)
+            lines += " {0:2!s} {1:10.5f}   {2!s}_PP_filename\n".format(symbol, mass, symbol)
         else:
-            lines += " %2s %10.5f   %s\n" % (symbol, mass, pp_filenames[symbol])
+            lines += " {0:2!s} {1:10.5f}   {2!s}\n".format(symbol, mass, pp_filenames[symbol])
     lines += "ATOMIC_POSITIONS crystal\n"
     for i, (symbol, pos_line) in enumerate(zip(
             chemical_symbols,
             get_scaled_positions_lines(positions).split('\n'))):
-        lines += (" %2s " % symbol) + pos_line
+        lines += (" {0:2!s} ".format(symbol)) + pos_line
         if i < len(chemical_symbols) - 1:
             lines += "\n"
 
@@ -209,7 +208,7 @@ class PwscfIn:
 
         for tag in ['ibrav', 'nat', 'ntyp']:
             if tag not in elements:
-                print "%s is not found in the input file." % tag
+                print "{0!s} is not found in the input file.".format(tag)
                 sys.exit(1)
                     
         for tag, self._values in elements.iteritems():

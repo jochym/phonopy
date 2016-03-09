@@ -50,14 +50,14 @@ def write_FORCE_SETS(dataset, filename='FORCE_SETS'):
     
     # Write FORCE_SETS
     fp = open(filename, 'w')
-    fp.write("%-5d\n" % num_atom)
-    fp.write("%-5d\n" % len(displacements))
+    fp.write("{0:<5d}\n".format(num_atom))
+    fp.write("{0:<5d}\n".format(len(displacements)))
     for count, disp in enumerate(displacements):
-        fp.write("\n%-5d\n" % (disp['number'] + 1))
-        fp.write("%20.16f %20.16f %20.16f\n" % (tuple(disp['displacement'])))
+        fp.write("\n{0:<5d}\n".format((disp['number'] + 1)))
+        fp.write("{0:20.16f} {1:20.16f} {2:20.16f}\n".format(*(tuple(disp['displacement']))))
 
         for f in forces[count]:
-            fp.write("%15.10f %15.10f %15.10f\n" % (tuple(f)))
+            fp.write("{0:15.10f} {1:15.10f} {2:15.10f}\n".format(*(tuple(f))))
 
 def parse_FORCE_SETS(is_translational_invariance=False, filename="FORCE_SETS"):
     f = open(filename, 'r')
@@ -107,8 +107,8 @@ def get_drift_forces(forces, filename=None):
     if filename is None:
         print("Drift force")
     else:
-        print("Drift force of %s" % filename)
-    print("%12.8f %12.8f %12.8f" % tuple(drift_force))
+        print("Drift force of {0!s}".format(filename))
+    print("{0:12.8f} {1:12.8f} {2:12.8f}".format(*tuple(drift_force)))
     print("This drift force was subtracted from forces.")
 
     return drift_force
@@ -158,7 +158,7 @@ def iter_collect_forces(filename,
             prev_forces = forces[:]
 
     if i == max_iter - 1:
-        print("Reached to max number of iterations (%d)." % max_iter)
+        print("Reached to max number of iterations ({0:d}).".format(max_iter))
         
     return forces
     
@@ -168,10 +168,10 @@ def iter_collect_forces(filename,
 def write_FORCE_CONSTANTS(force_constants, filename='FORCE_CONSTANTS'):
     w = open(filename, 'w')
     fc_shape = force_constants.shape
-    w.write("%4d\n" % (fc_shape[0]))
+    w.write("{0:4d}\n".format((fc_shape[0])))
     for i in range(fc_shape[0]):
         for j in range(fc_shape[1]):
-            w.write("%4d%4d\n" % (i+1, j+1))
+            w.write("{0:4d}{1:4d}\n".format(i+1, j+1))
             for vec in force_constants[i][j]:
                 w.write(("%22.15f"*3 + "\n") % tuple(vec))
     w.close()
@@ -252,26 +252,25 @@ def parse_disp_yaml(filename="disp.yaml", return_cell=False):
 def write_disp_yaml(displacements, supercell, directions=None,
                     filename='disp.yaml'):
     file = open(filename, 'w')
-    file.write("natom: %4d\n" % supercell.get_number_of_atoms())
+    file.write("natom: {0:4d}\n".format(supercell.get_number_of_atoms()))
     file.write("displacements:\n")
     for i, disp in enumerate(displacements):
-        file.write("- atom: %4d\n" % (disp[0] + 1))
+        file.write("- atom: {0:4d}\n".format((disp[0] + 1)))
         if directions is not None:
             file.write("  direction:\n")
-            file.write("    [ %20.16f,%20.16f,%20.16f ]\n" % tuple(directions[i][1:4]))
+            file.write("    [ {0:20.16f},{1:20.16f},{2:20.16f} ]\n".format(*tuple(directions[i][1:4])))
         file.write("  displacement:\n")
-        file.write("    [ %20.16f,%20.16f,%20.16f ]\n" % tuple(disp[1:4]))
+        file.write("    [ {0:20.16f},{1:20.16f},{2:20.16f} ]\n".format(*tuple(disp[1:4])))
             
     file.write("lattice:\n")
     for axis in supercell.get_cell():
-        file.write("- [ %20.15f,%20.15f,%20.15f ]\n" % tuple(axis))
+        file.write("- [ {0:20.15f},{1:20.15f},{2:20.15f} ]\n".format(*tuple(axis)))
     symbols = supercell.get_chemical_symbols()
     positions = supercell.get_scaled_positions()
     file.write("atoms:\n")
     for i, (s, v) in enumerate(zip(symbols, positions)):
-        file.write("- symbol: %-2s # %d\n" % (s, i+1))
-        file.write("  position: [ %18.14f,%18.14f,%18.14f ]\n" % \
-                       (v[0], v[1], v[2]))
+        file.write("- symbol: {0:<2!s} # {1:d}\n".format(s, i+1))
+        file.write("  position: [ {0:18.14f},{1:18.14f},{2:18.14f} ]\n".format(v[0], v[1], v[2]))
     file.close()
 
 #
@@ -344,7 +343,7 @@ def get_born_parameters(f, primitive, symmetry):
             print("Number of lines for Born effect charge is not enough.")
             return False
         if not len(line) == 9:
-            print("BORN file format of line %d is incorrect" % (i + 3))
+            print("BORN file format of line {0:d} is incorrect".format((i + 3)))
             return False
         born[i] = np.reshape([float(x) for x in line], (3, 3))
 
@@ -408,8 +407,7 @@ def read_thermal_properties_yaml(filenames, factor=1.0):
         print("Check your input files")
         print("Disagreement of temperature range or step")
         for t, fname in zip(temp, filenames):
-            print("%s: Range [ %d, %d ], Step %f" %
-                  (fname, int(t[0]), int(t[-1]), t[1] - t[0]))
+            print("{0!s}: Range [ {1:d}, {2:d} ], Step {3:f}".format(fname, int(t[0]), int(t[-1]), t[1] - t[0]))
         print('')
         print("Stop phonopy-qha")
         sys.exit(1)

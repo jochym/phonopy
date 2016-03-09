@@ -62,7 +62,7 @@ phonon.set_thermal_properties(t_step=10,
 # DOS
 phonon.set_total_DOS(sigma=0.1)
 for omega, dos in np.array(phonon.get_total_DOS()).T:
-    print "%15.7f%15.7f" % (omega, dos)
+    print "{0:15.7f}{1:15.7f}".format(omega, dos)
 phonon.plot_total_DOS().show()
 
 # Thermal properties

@@ -64,8 +64,7 @@ def parse_set_of_forces(displacements,
                 return []
         else:
             if not (natom == len(wien2k_forces)):
-                print("%s contains only forces of %d atoms" %
-                      (wien2k_filename, len(wien2k_forces)))
+                print("{0!s} contains only forces of {1:d} atoms".format(wien2k_filename, len(wien2k_forces)))
                 return []
             else:
                 forces = wien2k_forces
@@ -91,13 +90,13 @@ def get_wien2k_struct(cell, npts, r0s, rmts):
     text += "Title\n"
     
     # 2
-    text += "%-4s%23s%3d\n" % ("P", "LATTICE,NONEQUIV.ATOMS:", num_atom)
+    text += "{0:<4!s}{1:23!s}{2:3d}\n".format("P", "LATTICE,NONEQUIV.ATOMS:", num_atom)
     
     # 3
-    text += "%13s%4s\n" % ("MODE OF CALC=", "RELA")
+    text += "{0:13!s}{1:4!s}\n".format("MODE OF CALC=", "RELA")
     
     # 4
-    text += "%10.6f%10.6f%10.6f%10.6f%10.6f%10.6f\n" % (
+    text += "{0:10.6f}{1:10.6f}{2:10.6f}{3:10.6f}{4:10.6f}{5:10.6f}\n".format(
         a, b, c, alpha, beta, gamma)
     
     for i, pos in enumerate(positions):
@@ -105,27 +104,27 @@ def get_wien2k_struct(cell, npts, r0s, rmts):
         for j in (0,1,2):
             if pos[j] < 0:
                 pos[j] += 1
-            if int(float("%10.8f" % pos[j])) == 1:
+            if int(float("{0:10.8f}".format(pos[j]))) == 1:
                 pos[j] = 0.0
 
         # 5 format (4X,I4,4X,F10.8,3X,F10.8,3X,F10.8)
-        text += "%4s%4d%4s%10.8f%3s%10.8f%3s%10.8f\n" % (
+        text += "{0:4!s}{1:4d}{2:4!s}{3:10.8f}{4:3!s}{5:10.8f}{6:3!s}{7:10.8f}\n".format(
             "ATOM", -(i + 1), ": X=", pos[0], " Y=", pos[1], " Z=", pos[2])
     
         # 6  format (15X,I2,17X,I2)
-        text += "%15s%2d%17s%2d\n" % ("MULT=", 1, "ISPLIT=", 8)
+        text += "{0:15!s}{1:2d}{2:17!s}{3:2d}\n".format("MULT=", 1, "ISPLIT=", 8)
     
         # 7 format (A10,5X,I5,5X,F10.8,5X,F10.5,5X,F5.2)
         npt = npts[i]
         r0 = r0s[i]
         rmt = rmts[i]
-        text += "%-10s%5s%5d%5s%10.8f%5s%10.5f%5s%5.1f\n" % (
+        text += "{0:<10!s}{1:5!s}{2:5d}{3:5!s}{4:10.8f}{5:5!s}{6:10.5f}{7:5!s}{8:5.1f}\n".format(
             symbols[i], "NPT=", npt, "R0=", r0, "RMT=", rmt, "Z:", numbers[i])
     
         # 8 - 10 format (20X,3F10.7)
-        text += "%-20s%10.7f%10.7f%10.7f\n" % ("LOCAL ROT MATRIX:", 1, 0, 0)
-        text += "%-20s%10.7f%10.7f%10.7f\n" % ("", 0, 1, 0)
-        text += "%-20s%10.7f%10.7f%10.7f\n" % ("", 0, 0, 1)
+        text += "{0:<20!s}{1:10.7f}{2:10.7f}{3:10.7f}\n".format("LOCAL ROT MATRIX:", 1, 0, 0)
+        text += "{0:<20!s}{1:10.7f}{2:10.7f}{3:10.7f}\n".format("", 0, 1, 0)
+        text += "{0:<20!s}{1:10.7f}{2:10.7f}{3:10.7f}\n".format("", 0, 0, 1)
 
     text +="   0      NUMBER OF SYMMETRY OPERATIONS"
 
@@ -264,9 +263,8 @@ def write_supercells_with_displacements(supercell,
     w.close()
     for i, cell in enumerate(cells_with_displacements):
         symmetry = Symmetry(cell)
-        supercell_filename = filename.split('/')[-1]+"S-%03d" % (i + 1)
-        print("Number of non-equivalent atoms in %s: %d" %
-              (supercell_filename, len(symmetry.get_independent_atoms())))
+        supercell_filename = filename.split('/')[-1]+"S-{0:03d}".format((i + 1))
+        print("Number of non-equivalent atoms in {0!s}: {1:d}".format(supercell_filename, len(symmetry.get_independent_atoms())))
         w = open(supercell_filename, 'w')
         w.write(get_wien2k_struct(cell, npts_super, r0s_super, rmts_super))
         w.close()
@@ -314,7 +312,7 @@ def _distribute_forces(supercell, disp, forces, filename, symprec):
     atoms_in_dot_scf = _get_independent_atoms_in_dot_scf(filename)
 
     if len(forces) != len(atoms_in_dot_scf):
-        print("%s does not contain necessary information." % filename)
+        print("{0!s} does not contain necessary information.".format(filename))
         print("Plese check if there are \"FGL\" lines with")
         print("\"total forces\" are required.")
         return False
@@ -323,12 +321,12 @@ def _distribute_forces(supercell, disp, forces, filename, symprec):
         print('')
         print("It is assumed that there is no symmetrically-equivalent "
               "atoms in ")
-        print("\'%s\' at wien2k calculation." % filename)
+        print("\'{0!s}\' at wien2k calculation.".format(filename))
         print('')
         force_set = forces
     elif len(forces) != len(independent_atoms):
-        print("Non-equivalent atoms of %s could not be recognized by phonopy." %
-              filename)
+        print("Non-equivalent atoms of {0!s} could not be recognized by phonopy.".format(
+              filename))
         return False
     else:
         # 1. Transform wien2k forces to those on independent atoms
@@ -387,7 +385,7 @@ if __name__ == '__main__':
         for pos in positions:
             for i in (0,1,2):
                 # The following %19.16f follows write_vasp
-                if float("%19.16f" % pos[i]) >= 1:
+                if float("{0:19.16f}".format(pos[i])) >= 1:
                     pos[i] -= 1.0
         cell.set_scaled_positions(positions)
 
@@ -424,8 +422,7 @@ if __name__ == '__main__':
         w.write("# symbol       npt       r0             rmt\n")
         for symbol, npt, r0, rmt in \
                 zip(cell.get_chemical_symbols(), npts, r0s, rmts):
-            w.write("%-10s     %5d     %10.8f     %10.5f\n" %
-                    (symbol, npt, r0, rmt))
+            w.write("{0:<10!s}     {1:5d}     {2:10.8f}     {3:10.5f}\n".format(symbol, npt, r0, rmt))
     else:
         print("You need to set -r or -w option.")
 

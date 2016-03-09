@@ -18,7 +18,7 @@ class TestTriplets(unittest.TestCase):
         self._mesh = (10, 10, 10)
         print("Compare get_grid_point_from_address from spglib and that "
               "written in python")
-        print("with mesh numbers [%d %d %d]" % self._mesh)
+        print("with mesh numbers [{0:d} {1:d} {2:d}]".format(*self._mesh))
 
         for address in list(np.ndindex(self._mesh)):
             gp_spglib = get_grid_point_from_address(address, self._mesh)

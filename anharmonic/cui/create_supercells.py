@@ -64,7 +64,7 @@ def create_phono3py_supercells(unitcell,
     
     if log_level:
         print('')
-        print("Displacement distance: %s" % displacement_distance)
+        print("Displacement distance: {0!s}".format(displacement_distance))
 
     if output_filename is None:
         filename = 'disp_fc3.yaml'
@@ -76,15 +76,15 @@ def create_phono3py_supercells(unitcell,
                                                     filename=filename)
     for i, dcell in enumerate(phono3py.get_supercells_with_displacements()):
         if dcell is not None:
-            write_vasp('POSCAR-%05d' % (i + 1), dcell, direct=True)
+            write_vasp('POSCAR-{0:05d}'.format((i + 1)), dcell, direct=True)
 
     if log_level:
-        print("Number of displacements: %d" % num_disps)
+        print("Number of displacements: {0:d}".format(num_disps))
         if cutoff_pair_distance is not None:
-            print("Cutoff distance for displacements: %s" %
-                  cutoff_pair_distance)
-            print("Number of displacement supercell files created: %d" %
-                  num_disp_files)
+            print("Cutoff distance for displacements: {0!s}".format(
+                  cutoff_pair_distance))
+            print("Number of displacement supercell files created: {0:d}".format(
+                  num_disp_files))
             
     if phonon_supercell_matrix is not None:
         phonon_dds = phono3py.get_phonon_displacement_dataset()
@@ -99,7 +99,7 @@ def create_phono3py_supercells(unitcell,
                                         filename=filename)
         for i, dcell in enumerate(
                 phono3py.get_phonon_supercells_with_displacements()):
-            write_vasp('POSCAR_FC2-%05d' % (i + 1), dcell, direct=True)
+            write_vasp('POSCAR_FC2-{0:05d}'.format((i + 1)), dcell, direct=True)
 
         if log_level:
-            print("Number of displacements for special fc2: %d" % num_disps)
+            print("Number of displacements for special fc2: {0:d}".format(num_disps))

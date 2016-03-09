@@ -54,6 +54,6 @@ phonon.produce_force_constants(forces=set_of_forces)
 print
 print "[Phonopy] Phonon frequencies at Gamma:"
 for i, freq in enumerate(phonon.get_frequencies((0, 0, 0))):
-    print "[Phonopy] %3d: %10.5f THz" %  (i + 1, freq) # THz
+    print "[Phonopy] {0:3d}: {1:10.5f} THz".format(i + 1, freq) # THz
 
 

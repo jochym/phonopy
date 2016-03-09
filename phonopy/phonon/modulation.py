@@ -190,7 +190,7 @@ class Modulation:
         dim = self._get_dimension_3x3()
         w.write("  dimension:\n")
         for v in dim:
-            w.write("  - [ %d, %d, %d ]\n" % tuple(v))
+            w.write("  - [ {0:d}, {1:d}, {2:d} ]\n".format(*tuple(v)))
         self._write_cell_yaml(self._supercell, w)
         inv_lattice = np.linalg.inv(self._supercell.get_cell().T)
 
@@ -198,46 +198,39 @@ class Modulation:
         for u, mode in zip(self._u,
                            self._phonon_modes):
             q = mode[0]
-            w.write("- q-position: [ %12.7f, %12.7f, %12.7f ]\n" %
-                       tuple(q))
-            w.write("  band: %d\n" % (mode[1] + 1))
-            w.write("  amplitude: %f\n" % mode[2])
-            w.write("  phase: %f\n" % mode[3])
+            w.write("- q-position: [ {0:12.7f}, {1:12.7f}, {2:12.7f} ]\n".format(*
+                       tuple(q)))
+            w.write("  band: {0:d}\n".format((mode[1] + 1)))
+            w.write("  amplitude: {0:f}\n".format(mode[2]))
+            w.write("  phase: {0:f}\n".format(mode[3]))
             w.write("  displacements:\n")
             for i, p in enumerate(u):
-                w.write("  - [ %20.15f, %20.15f ] # %d x (%f)\n" %
-                        (p[0].real, p[0].imag, i + 1, abs(p[0])))
-                w.write("  - [ %20.15f, %20.15f ] # %d y (%f)\n" %
-                        (p[1].real, p[1].imag, i + 1, abs(p[1])))
-                w.write("  - [ %20.15f, %20.15f ] # %d z (%f)\n" %
-                        (p[2].real, p[2].imag, i + 1, abs(p[2])))
+                w.write("  - [ {0:20.15f}, {1:20.15f} ] # {2:d} x ({3:f})\n".format(p[0].real, p[0].imag, i + 1, abs(p[0])))
+                w.write("  - [ {0:20.15f}, {1:20.15f} ] # {2:d} y ({3:f})\n".format(p[1].real, p[1].imag, i + 1, abs(p[1])))
+                w.write("  - [ {0:20.15f}, {1:20.15f} ] # {2:d} z ({3:f})\n".format(p[2].real, p[2].imag, i + 1, abs(p[2])))
             w.write("  fractional_displacements:\n")
             for i, p in enumerate(np.dot(u, inv_lattice.T)):
-                w.write("  - [ %20.15f, %20.15f ] # %d a\n" %
-                        (p[0].real, p[0].imag, i + 1))
-                w.write("  - [ %20.15f, %20.15f ] # %d b\n" %
-                        (p[1].real, p[1].imag, i + 1))
-                w.write("  - [ %20.15f, %20.15f ] # %d c\n" %
-                        (p[2].real, p[2].imag, i + 1))
+                w.write("  - [ {0:20.15f}, {1:20.15f} ] # {2:d} a\n".format(p[0].real, p[0].imag, i + 1))
+                w.write("  - [ {0:20.15f}, {1:20.15f} ] # {2:d} b\n".format(p[1].real, p[1].imag, i + 1))
+                w.write("  - [ {0:20.15f}, {1:20.15f} ] # {2:d} c\n".format(p[2].real, p[2].imag, i + 1))
 
         w.write("phonon:\n")
         freqs = self._eigvals_to_frequencies(self._eigvals)
         for eigvec, freq, mode in zip(self._eigvecs,
                                       freqs,
                                       self._phonon_modes):
-            w.write("- q-position: [ %12.7f, %12.7f, %12.7f ]\n" %
-                       tuple(mode[0]))
-            w.write("  band: %d\n" % (mode[1] + 1))
-            w.write("  amplitude: %f\n" % mode[2])
-            w.write("  phase: %f\n" % mode[3])
-            w.write("  frequency: %15.10f\n" % freq)
+            w.write("- q-position: [ {0:12.7f}, {1:12.7f}, {2:12.7f} ]\n".format(*
+                       tuple(mode[0])))
+            w.write("  band: {0:d}\n".format((mode[1] + 1)))
+            w.write("  amplitude: {0:f}\n".format(mode[2]))
+            w.write("  phase: {0:f}\n".format(mode[3]))
+            w.write("  frequency: {0:15.10f}\n".format(freq))
             w.write("  eigenvector:\n")
             for j in range(num_atom):
-                w.write("  - # atom %d\n" % (j + 1))
+                w.write("  - # atom {0:d}\n".format((j + 1)))
                 for k in (0, 1, 2):
                     val = eigvec[j * 3 + k]
-                    w.write("    - [ %17.14f, %17.14f ] # %f\n" %
-                               (val.real, val.imag, np.angle(val, deg=True)))
+                    w.write("    - [ {0:17.14f}, {1:17.14f} ] # {2:f}\n".format(val.real, val.imag, np.angle(val, deg=True)))
 
     def _write_cell_yaml(self, cell, w):
         lattice = cell.get_cell()
@@ -246,16 +239,16 @@ class Modulation:
         symbols = cell.get_chemical_symbols()
         w.write("  atom_info:\n")
         for m, s in zip(masses, symbols):
-            w.write("  - { name: %2s, mass: %10.5f }\n" % (s, m))
+            w.write("  - {{ name: {0:2!s}, mass: {1:10.5f} }}\n".format(s, m))
         
         w.write("  reciprocal_lattice:\n")
         for vec, axis in zip(np.linalg.inv(lattice), ('a*', 'b*', 'c*')):
-            w.write("  - [ %12.8f, %12.8f, %12.8f ] # %2s\n" %
-                    (tuple(vec) + (axis,)))
+            w.write("  - [ {0:12.8f}, {1:12.8f}, {2:12.8f} ] # {3:2!s}\n".format(*
+                    (tuple(vec) + (axis,))))
         w.write("  real_lattice:\n")
-        w.write("  - [ %20.15f, %20.15f, %20.15f ]\n" % (tuple(lattice[0])))
-        w.write("  - [ %20.15f, %20.15f, %20.15f ]\n" % (tuple(lattice[1])))
-        w.write("  - [ %20.15f, %20.15f, %20.15f ]\n" % (tuple(lattice[2])))
+        w.write("  - [ {0:20.15f}, {1:20.15f}, {2:20.15f} ]\n".format(*(tuple(lattice[0]))))
+        w.write("  - [ {0:20.15f}, {1:20.15f}, {2:20.15f} ]\n".format(*(tuple(lattice[1]))))
+        w.write("  - [ {0:20.15f}, {1:20.15f}, {2:20.15f} ]\n".format(*(tuple(lattice[2]))))
         w.write("  positions:\n")
         for p in positions:
-            w.write("  - [ %20.15f, %20.15f, %20.15f ]\n" % (tuple(p)))
+            w.write("  - [ {0:20.15f}, {1:20.15f}, {2:20.15f} ]\n".format(*(tuple(p))))

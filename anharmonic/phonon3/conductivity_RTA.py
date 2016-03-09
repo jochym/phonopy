@@ -182,7 +182,7 @@ def _write_kappa(br, filename=None, log_level=0):
         if log_level:
             text = "----------- Thermal conductivity (W/m-k) "
             if sigma:
-                text += "for sigma=%s -----------" % sigma
+                text += "for sigma={0!s} -----------".format(sigma)
             else:
                 text += "with tetrahedron method -----------"
             print(text)
@@ -445,8 +445,8 @@ class Conductivity_RTA(Conductivity):
         else:
             self._collision.set_grid_point(grid_point)
             if self._log_level:
-                print("Number of triplets: %d" %
-                      len(self._pp.get_triplets_at_q()[0]))
+                print("Number of triplets: {0:d}".format(
+                      len(self._pp.get_triplets_at_q()[0])))
                 print("Calculating interaction...")
                 
             self._collision.run_interaction()
@@ -502,7 +502,7 @@ class Conductivity_RTA(Conductivity):
                 if sigma is None:
                     text += "tetrahedron method"
                 else:
-                    text += "sigma=%s" % sigma
+                    text += "sigma={0!s}".format(sigma)
                 print(text)
             self._collision.set_sigma(sigma)
             if not sigma or self._run_with_g:
@@ -557,7 +557,7 @@ class Conductivity_RTA(Conductivity):
         if self._gv_delta_q is None:
             pass
         else:
-            text += "  (dq=%3.1e)" % self._gv_delta_q
+            text += "  (dq={0:3.1e})".format(self._gv_delta_q)
         print(text)
 
         if self._log_level > 1:
@@ -571,15 +571,13 @@ class Conductivity_RTA(Conductivity):
                     if rotation_map[k] != j:
                         continue
     
-                    print(" k*%-2d (%5.2f %5.2f %5.2f)" %
-                          ((i + 1,) + tuple(np.dot(rot, q))))
+                    print(" k*{0:<2d} ({1:5.2f} {2:5.2f} {3:5.2f})".format(*
+                          ((i + 1,) + tuple(np.dot(rot, q)))))
                     for f, v, pp in zip(frequencies,
                                     np.dot(rot_c, gv.T).T,
                                     ave_pp):
-                        print("%8.3f   (%8.3f %8.3f %8.3f) %8.3f %11.3e" %
-                              (f, v[0], v[1], v[2], np.linalg.norm(v), pp))
+                        print("{0:8.3f}   ({1:8.3f} {2:8.3f} {3:8.3f}) {4:8.3f} {5:11.3e}".format(f, v[0], v[1], v[2], np.linalg.norm(v), pp))
             print('')
         else:
             for f, v, pp in zip(frequencies, gv, ave_pp):
-                print("%8.3f   (%8.3f %8.3f %8.3f) %8.3f %11.3e" %
-                      (f, v[0], v[1], v[2], np.linalg.norm(v), pp))
+                print("{0:8.3f}   ({1:8.3f} {2:8.3f} {3:8.3f}) {4:8.3f} {5:11.3e}".format(f, v[0], v[1], v[2], np.linalg.norm(v), pp))

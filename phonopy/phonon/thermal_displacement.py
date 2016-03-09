@@ -146,18 +146,18 @@ class ThermalDisplacements(ThermalMotion):
         natom = len(self._masses)
         f = open('thermal_displacements.yaml', 'w')
         f.write("# Thermal displacements\n")
-        f.write("natom: %5d\n" % (natom))
-        f.write("cutoff_frequency: %f\n" % self._cutoff_frequency)
+        f.write("natom: {0:5d}\n".format((natom)))
+        f.write("cutoff_frequency: {0:f}\n".format(self._cutoff_frequency))
 
         f.write("thermal_displacements:\n")
         for t, u in zip(self._temperatures, self._displacements):
-            f.write("- temperature:   %15.7f\n" % t)
+            f.write("- temperature:   {0:15.7f}\n".format(t))
             f.write("  displacements:\n")
             for i, elems in enumerate(np.reshape(u, (natom, -1))):
-                f.write("  - [ %10.7f" % elems[0])
+                f.write("  - [ {0:10.7f}".format(elems[0]))
                 for j in range(len(elems) - 1):
-                    f.write(", %10.7f" % elems[j + 1])
-                f.write(" ] # atom %d\n" % (i + 1))
+                    f.write(", {0:10.7f}".format(elems[j + 1]))
+                f.write(" ] # atom {0:d}\n".format((i + 1)))
         
     def plot(self, pyplot, is_legend=False):
         plots = []
@@ -165,7 +165,7 @@ class ThermalDisplacements(ThermalMotion):
         xyz = ['x', 'y', 'z']
         for i, u in enumerate(self._displacements.transpose()):
             plots.append(pyplot.plot(self._temperatures, u ))
-            labels.append("%d-%s" % ( i//3 + 1, xyz[i % 3]))
+            labels.append("{0:d}-{1!s}".format(i//3 + 1, xyz[i % 3]))
         
         if is_legend:
             pyplot.legend(plots, labels, loc='upper left')
@@ -206,11 +206,11 @@ class ThermalDisplacementMatrices(ThermalMotion):
         natom = len(self._masses)
         f = open('thermal_displacement_matrices.yaml', 'w')
         f.write("# Thermal displacement_matrices\n")
-        f.write("natom: %5d\n" % (natom))
-        f.write("cutoff_frequency: %f\n" % self._cutoff_frequency)
+        f.write("natom: {0:5d}\n".format((natom)))
+        f.write("cutoff_frequency: {0:f}\n".format(self._cutoff_frequency))
         f.write("thermal_displacement_matrices:\n")
         for t, matrices in zip(self._temperatures, self._disp_matrices):
-            f.write("- temperature:   %15.7f\n" % t)
+            f.write("- temperature:   {0:15.7f}\n".format(t))
             f.write("  displacement_matrices:\n")
             for i, mat in enumerate(matrices):
                 ## For checking imaginary part that should be zero
@@ -219,8 +219,7 @@ class ThermalDisplacementMatrices(ThermalMotion):
                 #     f.write("    [ %f, %f, %f, %f, %f, %f ]\n" %
                 #             (tuple(v.real) + tuple(v.imag)))
                 m = mat.real
-                f.write("  - [ %f, %f, %f, %f, %f, %f ] # atom %d\n" %
-                        (m[0, 0], m[1, 1], m[2, 2],
+                f.write("  - [ {0:f}, {1:f}, {2:f}, {3:f}, {4:f}, {5:f} ] # atom {6:d}\n".format(m[0, 0], m[1, 1], m[2, 2],
                          m[1, 2], m[0, 2], m[0, 1], i + 1))
         
 class ThermalDistances(ThermalMotion):
@@ -286,15 +285,14 @@ class ThermalDistances(ThermalMotion):
     def write_yaml(self):
         natom = len(self._masses)
         f = open('thermal_distances.yaml', 'w')
-        f.write("natom: %5d\n" % (natom))
-        f.write("cutoff_frequency: %f\n" % self._cutoff_frequency)
+        f.write("natom: {0:5d}\n".format((natom)))
+        f.write("cutoff_frequency: {0:f}\n".format(self._cutoff_frequency))
 
         f.write("thermal_distances:\n")
         for t, u in zip(self._temperatures, self._distances):
-            f.write("- temperature:   %15.7f\n" % t)
+            f.write("- temperature:   {0:15.7f}\n".format(t))
             f.write("  distance:\n")
             for i, (atom1, atom2) in enumerate(self._atom_pairs):
-                f.write("  - %10.7f # atom pair %d-%d\n"
-                        % (u[i], atom1 + 1, atom2 + 1))
+                f.write("  - {0:10.7f} # atom pair {1:d}-{2:d}\n".format(u[i], atom1 + 1, atom2 + 1))
 
 

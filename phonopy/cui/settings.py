@@ -1363,7 +1363,7 @@ class PhonopyConfParser(ConfParser):
                      confs['anime_type'] == 'jmol'):
                     self.set_parameter('anime_type', confs['anime_type'])
                 else:
-                    self.setting_error("%s is not available for ANIME_TYPE tag." % confs['anime_type'])
+                    self.setting_error("{0!s} is not available for ANIME_TYPE tag.".format(confs['anime_type']))
 
             # Modulation
             if conf_key == 'modulation':

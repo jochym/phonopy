@@ -75,23 +75,23 @@ class QpointsPhonon:
         
     def write_yaml(self):
         w = open('qpoints.yaml', 'w')
-        w.write("nqpoint: %-7d\n" % len(self._qpoints))
-        w.write("natom:   %-7d\n" % self._natom)
+        w.write("nqpoint: {0:<7d}\n".format(len(self._qpoints)))
+        w.write("natom:   {0:<7d}\n".format(self._natom))
         rec_lattice = np.linalg.inv(self._lattice) # column vectors
         w.write("reciprocal_lattice:\n")
         for vec, axis in zip(rec_lattice.T, ('a*', 'b*', 'c*')):
-            w.write("- [ %12.8f, %12.8f, %12.8f ] # %2s\n" %
-                    (tuple(vec) + (axis,)))
+            w.write("- [ {0:12.8f}, {1:12.8f}, {2:12.8f} ] # {3:2!s}\n".format(*
+                    (tuple(vec) + (axis,))))
         w.write("phonon:\n")
     
         for i, q in enumerate(self._qpoints):
-            w.write("- q-position: [ %12.7f, %12.7f, %12.7f ]\n" % tuple(q))
+            w.write("- q-position: [ {0:12.7f}, {1:12.7f}, {2:12.7f} ]\n".format(*tuple(q)))
             if self._write_dynamical_matrix:
                 w.write("  dynamical_matrix:\n")
                 for row in self._dm[i]:
                     w.write("  - [ ")
                     for j, elem in enumerate(row):
-                        w.write("%15.10f, %15.10f" % (elem.real, elem.imag))
+                        w.write("{0:15.10f}, {1:15.10f}".format(elem.real, elem.imag))
                         if j == len(row) - 1:
                             w.write(" ]\n")
                         else:
@@ -99,20 +99,19 @@ class QpointsPhonon:
             
             w.write("  band:\n")
             for j, freq in enumerate(self._frequencies[i]):
-                w.write("  - # %d\n" % (j + 1))
-                w.write("    frequency: %15.10f\n" % freq)
+                w.write("  - # {0:d}\n".format((j + 1)))
+                w.write("    frequency: {0:15.10f}\n".format(freq))
     
                 if self._gv is not None:
-                    w.write("    group_velocity: [ %13.7f, %13.7f, %13.7f ]\n" %
-                            tuple(self._gv[i, j]))
+                    w.write("    group_velocity: [ {0:13.7f}, {1:13.7f}, {2:13.7f} ]\n".format(*
+                            tuple(self._gv[i, j])))
     
                 if self._is_eigenvectors:
                     w.write("    eigenvector:\n")
                     for k in range(self._natom):
-                        w.write("    - # atom %d\n" % (k + 1))
+                        w.write("    - # atom {0:d}\n".format((k + 1)))
                         for l in (0, 1, 2):
-                            w.write("      - [ %17.14f, %17.14f ]\n" %
-                                    (self._eigenvectors[i][k * 3 + l, j].real,
+                            w.write("      - [ {0:17.14f}, {1:17.14f} ]\n".format(self._eigenvectors[i][k * 3 + l, j].real,
                                      self._eigenvectors[i][k * 3 + l, j].imag))
             w.write("\n")
 

@@ -58,8 +58,8 @@ def get_fc3(supercell,
     
     if 'cutoff_distance' in disp_dataset:
         if verbose:
-            print("Cutting-off fc3 (cut-off distance: %f)" %
-                  disp_dataset['cutoff_distance'])
+            print("Cutting-off fc3 (cut-off distance: {0:f})".format(
+                  disp_dataset['cutoff_distance']))
         cutoff_fc3(fc3,
                    supercell,
                    disp_dataset,
@@ -138,7 +138,7 @@ def distribute_fc3(fc3_least_atoms,
 
         if not (overwrite and i == i_rot):
             if verbose > 2:
-                print("    [ %d, x, x ] to [ %d, x, x ]" % (i_rot + 1, i + 1))
+                print("    [ {0:d}, x, x ] to [ {1:d}, x, x ]".format(i_rot + 1, i + 1))
                 sys.stdout.flush()
 
             try:
@@ -382,21 +382,21 @@ def solve_fc3(fc3,
               verbose=False):
 
     if verbose:
-        text = "Solving fc3[ %d, x, x ] with " % (first_atom_num + 1)
+        text = "Solving fc3[ {0:d}, x, x ] with ".format((first_atom_num + 1))
         if len(displacements_first) > 1:
             text += "displacements:"
         else:
             text += "a displacement:"
         print(text)
         for i, v in enumerate(displacements_first):
-            print("    [%7.4f %7.4f %7.4f]" % tuple(v))
+            print("    [{0:7.4f} {1:7.4f} {2:7.4f}]".format(*tuple(v)))
             sys.stdout.flush()
         if verbose > 2:
             print("  Site symmetry:")
             for i, v in enumerate(site_symmetry):
-                print("    [%2d %2d %2d] #%2d" % tuple(list(v[0])+[i + 1]))
-                print("    [%2d %2d %2d]" % tuple(v[1]))
-                print("    [%2d %2d %2d]\n" % tuple(v[2]))
+                print("    [{0:2d} {1:2d} {2:2d}] #{3:2d}".format(*tuple(list(v[0])+[i + 1])))
+                print("    [{0:2d} {1:2d} {2:2d}]".format(*tuple(v[1])))
+                print("    [{0:2d} {1:2d} {2:2d}]\n".format(*tuple(v[2])))
                 sys.stdout.flush()
 
     lattice = supercell.get_cell().T
@@ -502,12 +502,12 @@ def show_drift_fc3(fc3, name="fc3"):
         if abs(val3) > abs(maxval3):
             maxval3 = val3
             klm3 = [k, l, m]
-    text = "max drift of %s: " % name
-    text += "%f (%s%s%s) " % (maxval1,
+    text = "max drift of {0!s}: ".format(name)
+    text += "{0:f} ({1!s}{2!s}{3!s}) ".format(maxval1,
                               "xyz"[klm1[0]], "xyz"[klm1[1]], "xyz"[klm1[2]])
-    text += "%f (%s%s%s) " % (maxval2,
+    text += "{0:f} ({1!s}{2!s}{3!s}) ".format(maxval2,
                               "xyz"[klm2[0]], "xyz"[klm2[1]], "xyz"[klm2[2]])
-    text += "%f (%s%s%s)" % (maxval3,
+    text += "{0:f} ({1!s}{2!s}{3!s})".format(maxval3,
                              "xyz"[klm3[0]], "xyz"[klm3[1]], "xyz"[klm3[2]])
     print(text)
 

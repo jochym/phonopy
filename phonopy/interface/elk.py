@@ -97,7 +97,7 @@ def write_supercells_with_displacements(supercell,
                                         sp_filenames):
     write_elk("supercell.in", supercell, sp_filenames)
     for i, cell in enumerate(cells_with_displacements):
-        write_elk("supercell-%03d.in" % (i + 1), cell, sp_filenames)
+        write_elk("supercell-{0:03d}.in".format((i + 1)), cell, sp_filenames)
 
 def get_elk_structure(cell, sp_filenames=None):
     lattice = cell.get_cell()
@@ -117,10 +117,10 @@ def get_elk_structure(cell, sp_filenames=None):
     lines += ((" %21.16f" * 3 + "\n") * 3) % tuple(lattice.ravel())
     lines += "atoms\n"
     n_pos = 0
-    lines += " %d\n" % len(num_atoms)
+    lines += " {0:d}\n".format(len(num_atoms))
     for i, (n, s) in enumerate(zip(num_atoms, spfnames)):
-        lines += " \'%s\'\n" % s
-        lines += " %d\n" % n
+        lines += " \'{0!s}\'\n".format(s)
+        lines += " {0:d}\n".format(n)
         lines += get_scaled_positions_lines(scaled_positions[n_pos:(n_pos + n)])
         if i < len(num_atoms) - 1:
             lines += "\n"

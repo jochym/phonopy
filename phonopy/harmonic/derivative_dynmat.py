@@ -77,7 +77,7 @@ class DerivativeOfDynamicalMatrix:
         fc = self._force_constants
         itemsize = self._force_constants.itemsize
         ddm = np.zeros((3, num_patom * 3, num_patom * 3),
-                       dtype=("c%d" % (itemsize * 2)))
+                       dtype=("c{0:d}".format((itemsize * 2))))
         vectors = self._smallest_vectors
         multiplicity = self._multiplicity
         if self._dynmat.is_nac():
@@ -132,14 +132,14 @@ class DerivativeOfDynamicalMatrix:
 
         itemsize = self._force_constants.itemsize
         ddm = np.zeros((num_elem, 3 * num_patom, 3 * num_patom),
-                       dtype=("c%d" % (itemsize * 2)))
+                       dtype=("c{0:d}".format((itemsize * 2))))
         
         for i, j in list(np.ndindex(num_patom, num_patom)):
             s_i = self._p2s_map[i]
             s_j = self._p2s_map[j]
             mass = np.sqrt(self._mass[i] * self._mass[j])
             ddm_local = np.zeros((num_elem, 3, 3),
-                                 dtype=("c%d" % (itemsize * 2)))
+                                 dtype=("c{0:d}".format((itemsize * 2))))
 
             for k in range(num_satom):
                 if s_j != self._s2p_map[k]:

@@ -61,7 +61,7 @@ def get_imag_self_energy(interaction,
             weights = interaction.get_triplets_at_q()[1]
             print("------------------- Imaginary part of self energy (%d/%d) "
                   "-------------------" % (i + 1, len(grid_points)))
-            print("Grid point: %d" % gp)
+            print("Grid point: {0:d}".format(gp))
             print("Number of ir-triplets: "
                   "%d / %d" % (len(weights), weights.sum()))
         ise.run_interaction()
@@ -71,13 +71,13 @@ def get_imag_self_energy(interaction,
         if log_level:
             adrs = interaction.get_grid_address()[gp]
             q = adrs.astype('double') / mesh
-            print("q-point: %s" % q)
+            print("q-point: {0!s}".format(q))
             print("Phonon frequency:")
             text = "[ "
             for i, freq in enumerate(frequencies[gp]):
                 if i % 6 == 0 and i != 0:
                     text += "\n"
-                text += "%8.4f " % freq
+                text += "{0:8.4f} ".format(freq)
             text += "]"
             print(text)
 
@@ -89,7 +89,7 @@ def get_imag_self_energy(interaction,
         for j, sigma in enumerate(sigmas):
             if log_level:
                 if sigma:
-                    print("Sigma: %s" % sigma)
+                    print("Sigma: {0!s}".format(sigma))
                 else:
                     print("Tetrahedron method")
 
@@ -191,7 +191,7 @@ def get_linewidth(interaction,
         if log_level:
             weights = interaction.get_triplets_at_q()[1]
             print("------ Linewidth ------")
-            print("Grid point: %d" % gp)
+            print("Grid point: {0:d}".format(gp))
             print("Number of ir-triplets: "
                   "%d / %d" % (len(weights), weights.sum()))
         ise.run_interaction()
@@ -199,9 +199,9 @@ def get_linewidth(interaction,
         if log_level:
             adrs = interaction.get_grid_address()[gp]
             q = adrs.astype('double') / mesh
-            print("q-point: %s" % q)
+            print("q-point: {0!s}".format(q))
             print("Phonon frequency:")
-            print("%s" % frequencies[gp])
+            print("{0!s}".format(frequencies[gp]))
 
         if write_details:
             triplets, weights, _, _ = interaction.get_triplets_at_q()
@@ -209,7 +209,7 @@ def get_linewidth(interaction,
         for j, sigma in enumerate(sigmas):
             if log_level:
                 if sigma:
-                    print("Sigma: %s" % sigma)
+                    print("Sigma: {0!s}".format(sigma))
                 else:
                     print("Tetrahedron method")
             ise.set_sigma(sigma)
@@ -577,7 +577,7 @@ class ImagSelfEnergy:
             zip(self._triplets_at_q,
                 self._weights_at_q,
                 self._pp_strength)):
-            print("%d / %d" % (i + 1, len(self._triplets_at_q)))
+            print("{0:d} / {1:d}".format(i + 1, len(self._triplets_at_q)))
 
             freqs = self._frequencies[triplet]
             for j, bi in enumerate(self._band_indices):
@@ -658,7 +658,7 @@ class ImagSelfEnergy:
             zip(self._triplets_at_q,
                 self._weights_at_q,
                 self._pp_strength)):
-            print("%d / %d" % (i + 1, len(self._triplets_at_q)))
+            print("{0:d} / {1:d}".format(i + 1, len(self._triplets_at_q)))
 
             # freqs[2, num_band]
             freqs = self._frequencies[triplet[1:]]

@@ -51,47 +51,47 @@ def get_symmetry_yaml(cell, symmetry, phonopy_version=None):
     yaml = ""
 
     if phonopy_version is not None:
-        yaml += "phonopy_version: %s\n" % phonopy_version
+        yaml += "phonopy_version: {0!s}\n".format(phonopy_version)
 
     if cell.get_magnetic_moments() is None:
         yaml += "space_group_type: " + symmetry.get_international_table() + "\n"
     yaml += "point_group_type: " + symmetry.get_pointgroup() + "\n"
     yaml += "space_group_operations:\n"
     for i, (r, t) in enumerate(zip(rotations, translations)):
-        yaml += "- rotation: # %d\n" % (i+1)
+        yaml += "- rotation: # {0:d}\n".format((i+1))
         for vec in r:
-            yaml += "  - [%2d, %2d ,%2d]\n" % tuple(vec)
+            yaml += "  - [{0:2d}, {1:2d} ,{2:2d}]\n".format(*tuple(vec))
         yaml += "  translation: ["
         for j, x in enumerate(t):
             if abs(x - np.rint(x)) < 1e-5:
                 yaml += " 0.00000"
             else:
-                yaml += "%8.5f" % x
+                yaml += "{0:8.5f}".format(x)
             if j < 2:
                 yaml += ", "
             else:
                 yaml += "]\n"
     yaml += "atom_mapping:\n"
     for i, atom_num in enumerate(atom_sets):
-        yaml += "  %d: %d\n" % (i+1, atom_num+1)
+        yaml += "  {0:d}: {1:d}\n".format(i+1, atom_num+1)
     yaml += "site_symmetries:\n"
     for i in independent_atoms:
         sitesym = symmetry.get_site_symmetry(i)
-        yaml += "- atom: %d\n" % (i+1)
+        yaml += "- atom: {0:d}\n".format((i+1))
 
         if cell.get_magnetic_moments() is None:
-            yaml += "  Wyckoff: %s\n" % (wyckoffs[i])
+            yaml += "  Wyckoff: {0!s}\n".format((wyckoffs[i]))
         site_pointgroup = get_pointgroup(sitesym)
-        yaml += "  site_point_group: %s\n" % (site_pointgroup[0])
+        yaml += "  site_point_group: {0!s}\n".format((site_pointgroup[0]))
         yaml += "  orientation:\n"
         for v in site_pointgroup[1]:
-            yaml += "  - [%2d, %2d, %2d]\n" % tuple(v)
+            yaml += "  - [{0:2d}, {1:2d}, {2:2d}]\n".format(*tuple(v))
 
         yaml += "  rotations:\n"
         for j, r in enumerate(sitesym):
-            yaml += "  - # %d\n" % (j+1)
+            yaml += "  - # {0:d}\n".format((j+1))
             for vec in r:
-                yaml += "    - [%2d, %2d, %2d]\n" % tuple(vec)
+                yaml += "    - [{0:2d}, {1:2d}, {2:2d}]\n".format(*tuple(vec))
 
     return yaml
 

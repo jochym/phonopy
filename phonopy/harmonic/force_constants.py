@@ -473,17 +473,16 @@ def rotational_invariance(force_constants,
                         mat[j, k] += (fc[p, s, i, j] * v[k] -
                                       fc[p, s, i, k] * v[j])
 
-            print("Atom %d %s" % (p + 1, abc[i]))
+            print("Atom {0:d} {1!s}".format(p + 1, abc[i]))
             for vec in mat:
-                print("%10.5f %10.5f %10.5f" % tuple(vec))
+                print("{0:10.5f} {1:10.5f} {2:10.5f}".format(*tuple(vec)))
 
 def force_constants_log(force_constants):
     fs = force_constants
     for i, fs_i in enumerate(fs):
         for j, fs_j in enumerate(fs_i):
             for v in fs_j:
-                print("force constant (%d - %d): %10.5f %10.5f %10.5f" %
-                      (i + 1, j + 1, v[0], v[1], v[2]))
+                print("force constant ({0:d} - {1:d}): {2:10.5f} {3:10.5f} {4:10.5f}".format(i + 1, j + 1, v[0], v[1], v[2]))
 
 
 def similarity_transformation(rot, mat):
@@ -505,8 +504,7 @@ def show_drift_force_constants(force_constants, name="force constants"):
         if abs(val2) > abs(maxval2):
             maxval2 = val2
             jk2 = [j, k]
-    print("max drift of %s: %f (%s%s) %f (%s%s)" %
-          (name,
+    print("max drift of {0!s}: {1:f} ({2!s}{3!s}) {4:f} ({5!s}{6!s})".format(name,
            maxval1, "xyz"[jk1[0]], "xyz"[jk1[1]],
            maxval2, "xyz"[jk2[0]], "xyz"[jk2[1]]))
 
@@ -660,7 +658,7 @@ def _get_force_constants_disps(force_constants,
             else:
                 print(" Standard deviation of the force constants, full table:")
                 print(fc_errors / avg_len)
-                print(" Maximal table element is %f" % (fc_errors.max() / avg_len))
+                print(" Maximal table element is {0:f}".format((fc_errors.max() / avg_len)))
         
     return disp_atom_list
 

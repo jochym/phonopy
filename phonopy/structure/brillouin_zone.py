@@ -123,14 +123,14 @@ if __name__ == '__main__':
     bz = BrillouinZone(primitive_vectors)
     bz.run(qpoints)
     sv = bz.get_shortest_qpoints()
-    print("%d %d" % (len(bz_points), np.sum(len(x) for x in sv)))
+    print("{0:d} {1:d}".format(len(bz_points), np.sum(len(x) for x in sv)))
     for q, vs in zip(qpoints, sv):
         if np.allclose(q, vs[0]):
             print(q)
         else:
-            print("%s * %s" % (q, np.linalg.norm(np.dot(primitive_vectors, q))))
+            print("{0!s} * {1!s}".format(q, np.linalg.norm(np.dot(primitive_vectors, q))))
         for v in vs:
-            print("%s %s" % (v, np.linalg.norm(np.dot(primitive_vectors, v))))
+            print("{0!s} {1!s}".format(v, np.linalg.norm(np.dot(primitive_vectors, v))))
 
     rotations = symmetry.get_reciprocal_operations()
     print(get_lattice_vector_equivalence(rotations))

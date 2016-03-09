@@ -80,7 +80,7 @@ def read_siesta(filename):
     elif coordformat == "notscaledcartesianbohr" or coordformat == "bohr":
         cell.set_positions(np.array(positions))
     else:
-        print "The format %s for the AtomicCoordinatesFormat is not implemented"%coordformat
+        print "The format {0!s} for the AtomicCoordinatesFormat is not implemented".format(coordformat)
         exit() 
     
     return cell, atypes
@@ -94,7 +94,7 @@ def write_supercells_with_displacements(supercell,
                                         atypes):
     write_siesta("supercell.fdf", supercell, atypes)
     for i, cell in enumerate(cells_with_displacements):
-        write_siesta("supercell-%03d.fdf" % (i + 1), cell, atypes)
+        write_siesta("supercell-{0:03d}.fdf".format((i + 1)), cell, atypes)
 
 def get_siesta_structure(cell,atypes):
     lattice = cell.get_cell()
@@ -104,7 +104,7 @@ def get_siesta_structure(cell,atypes):
    
     lines = ""
     
-    lines += "NumberOfAtoms %d\n\n"% len(positions)
+    lines += "NumberOfAtoms {0:d}\n\n".format(len(positions))
 
     lines += "%block LatticeVectors\n"
     lines += ((" %21.16f" * 3 + "\n") * 3) % tuple(lattice.ravel())
@@ -141,7 +141,7 @@ class SiestaIn:
             - atomic_species
         """
         #capture tags
-        for tag,value,unit in re.findall('([\.A-Za-z]+)\s+?%s(?:[ ]+)?([A-Za-z]+)?'%self._num_regex,lines):
+        for tag,value,unit in re.findall('([\.A-Za-z]+)\s+?{0!s}(?:[ ]+)?([A-Za-z]+)?'.format(self._num_regex),lines):
             tag = tag.lower()
             if tag == "latticeconstant":
                 self._tags['latticeconstantunit'] = unit.lower()
@@ -185,7 +185,7 @@ class SiestaIn:
     
     def check_present(self,tag):
         if not self._tags[tag]:
-            print "%s not present"%tag
+            print "{0!s} not present".format(tag)
             exit()
  
     def __str__(self):

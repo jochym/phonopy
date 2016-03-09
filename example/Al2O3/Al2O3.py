@@ -63,7 +63,7 @@ for (qs_at_segments,
     for q, d, f in zip(qs_at_segments,
                        dists_at_segments,
                        freqs_at_segments):
-        print "# %f %f %f" % tuple(q)
+        print "# {0:f} {1:f} {2:f}".format(*tuple(q))
         print d, ("%f " * len(f)) % tuple(f)
 
 # If you just want to plot along q-points of all band segments, the

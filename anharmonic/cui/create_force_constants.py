@@ -82,7 +82,7 @@ def create_phono3py_force_constants(phono3py,
                 filename = 'fc3.' + input_filename + '.hdf5'
             file_exists(filename, log_level)
             if log_level:
-                print("Reading fc3 from %s" % filename)
+                print("Reading fc3 from {0!s}".format(filename))
             fc3 = read_fc3_from_hdf5(filename=filename)
             phono3py.set_fc3(fc3)
         else: # fc3 from FORCES_THIRD and FORCES_SECOND
@@ -105,7 +105,7 @@ def create_phono3py_force_constants(phono3py,
             filename = 'fc2.' + input_filename + '.hdf5'
         file_exists(filename, log_level)
         if log_level:
-            print("Reading fc2 from %s" % filename)
+            print("Reading fc2 from {0!s}".format(filename))
         phonon_supercell = phono3py.get_phonon_supercell()
         phonon_fc2 = read_fc2_from_hdf5(filename=filename)
         if phonon_fc2.shape[0] != phonon_supercell.get_number_of_atoms():
@@ -137,7 +137,7 @@ def create_phono3py_force_constants(phono3py,
         else:
             filename = 'fc2.' + output_filename + '.hdf5'
         if log_level:
-            print("Writing fc2 to %s" % filename)
+            print("Writing fc2 to {0!s}".format(filename))
         write_fc2_to_hdf5(phono3py.get_fc2(), filename=filename)
     
     if log_level:    
@@ -157,11 +157,11 @@ def _create_phono3py_fc3(phono3py,
         filename = 'disp_fc3.' + input_filename + '.yaml'
     file_exists(filename, log_level)
     if log_level:
-        print("Displacement dataset is read from %s." % filename)
+        print("Displacement dataset is read from {0!s}.".format(filename))
     disp_dataset = parse_disp_fc3_yaml(filename=filename)
     file_exists("FORCES_FC3", log_level)
     if log_level:
-        print("Sets of supercell forces are read from %s." % "FORCES_FC3")
+        print("Sets of supercell forces are read from {0!s}.".format("FORCES_FC3"))
     forces_fc3 = parse_FORCES_FC3(disp_dataset)
     phono3py.produce_fc3(
         forces_fc3,
@@ -175,7 +175,7 @@ def _create_phono3py_fc3(phono3py,
     else:
         filename = 'fc3.' + output_filename + '.hdf5'
     if log_level:
-        print("Writing fc3 to %s" % filename)
+        print("Writing fc3 to {0!s}".format(filename))
     write_fc3_to_hdf5(phono3py.get_fc3(), filename=filename)
 
 def _create_phono3py_fc2(phono3py,
@@ -188,12 +188,12 @@ def _create_phono3py_fc2(phono3py,
     else:
         filename = 'disp_fc3.' + input_filename + '.yaml'
     if log_level:
-        print("Displacement dataset is read from %s." % filename)
+        print("Displacement dataset is read from {0!s}.".format(filename))
     file_exists(filename, log_level)
     disp_dataset = parse_disp_fc3_yaml(filename=filename)
     if log_level:
-        print("Sets of supercell forces are read from %s." %
-              "FORCES_FC3")
+        print("Sets of supercell forces are read from {0!s}.".format(
+              "FORCES_FC3"))
     file_exists("FORCES_FC3", log_level)
     forces_fc3 = parse_FORCES_FC3(disp_dataset)
     phono3py.produce_fc2(
@@ -212,12 +212,12 @@ def _create_phono3py_phonon_fc2(phono3py,
     else:
         filename = 'disp_fc2.' + input_filename + '.yaml'
     if log_level:
-        print("Displacement dataset is read from %s." % filename)
+        print("Displacement dataset is read from {0!s}.".format(filename))
     file_exists(filename, log_level)
     disp_dataset = parse_disp_fc2_yaml(filename=filename)
     if log_level:
-        print("Sets of supercell forces are read from %s." %
-              "FORCES_FC2")
+        print("Sets of supercell forces are read from {0!s}.".format(
+              "FORCES_FC2"))
     file_exists("FORCES_FC2", log_level)
     forces_fc2 = parse_FORCES_FC2(disp_dataset)
     phono3py.produce_fc2(
