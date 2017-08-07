@@ -18,8 +18,8 @@ install:
     - conda install --yes python=$TRAVIS_PYTHON_VERSION pip setuptools_scm
     - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy h5py pyyaml matplotlib
     - pwd
-    # - git branch -v
-    # - git describe --tags --dirty
+    - git branch -v
+    - git describe --tags --dirty
     # - ./get_nanoversion.sh
     # - cat __nanoversion__.txt
     - python setup.py install
