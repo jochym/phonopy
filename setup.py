@@ -3,6 +3,7 @@ import os
 
 try:
     from setuptools import setup, Extension
+    from setuptools_scm import get_version
     use_setuptools = True
     print("setuptools is used.")
 except ImportError:
@@ -118,33 +119,27 @@ scripts_phonopy = ['scripts/phonopy',
                    'scripts/pdosplot']
 
 if __name__ == '__main__':
-    version_nums = [None, None, None]
-    with open("phonopy/version.py") as w:
-        for line in w:
-            if "__version__" in line:
-                for i, num in enumerate(line.split()[2].strip('\"').split('.')):
-                    version_nums[i] = int(num)
+    ver = get_version().split('.')
+    if len(ver)>3 :
+        # Post release version:
+        #  - add patchlevel at the end
+        #  - decrease back last number
+        print('Version from SCM:',ver)
+        try:
+            pl=int(ver[3].split('+')[0][3:])
+            ver[2]=str(int(ver[2])-1)
+            ver=ver[:3]
+            ver.append(str(pl))
+        except ValueError:
+            # This is probably build from pypi source
+            # Just keep the version from setuptools_scm and hope for the best
+            pass
 
-    # To deploy to pypi/conda by travis-CI
-    if os.path.isfile("__nanoversion__.txt"):
-        with open('__nanoversion__.txt') as nv:
-            try :
-                for line in nv:
-                    nanoversion = int(line.strip())
-                    break
-            except ValueError :
-                nanoversion = 0
-            if nanoversion:
-                version_nums.append(nanoversion)
+    ver='.'.join(ver)
 
-    if None in version_nums:
-        print("Failed to get version number in setup.py.")
-        raise
-
-    version_number = ".".join(["%d" % n for n in version_nums])
     if use_setuptools:
         setup(name='phonopy',
-              version=version_number,
+              version=ver,
               description='This is the phonopy module.',
               author='Atsushi Togo',
               author_email='atz.togo@gmail.com',
@@ -156,7 +151,7 @@ if __name__ == '__main__':
               ext_modules=ext_modules_phonopy)
     else:
         setup(name='phonopy',
-              version=version_number,
+              version=ver,
               description='This is the phonopy module.',
               author='Atsushi Togo',
               author_email='atz.togo@gmail.com',
