@@ -36,27 +36,39 @@ import sys
 import numpy as np
 import re
 
-from phonopy.file_IO import iter_collect_forces, get_drift_forces
-from phonopy.interface.vasp import get_scaled_positions_lines
+from phonopy.file_IO import iter_collect_forces
+from phonopy.interface.vasp import (get_scaled_positions_lines,
+                                    check_forces,
+                                    get_drift_forces)
 from phonopy.units import Bohr
 from phonopy.cui.settings import fracval
-from phonopy.structure.atoms import Atoms, symbol_map
+from phonopy.structure.atoms import PhonopyAtoms as Atoms
+from phonopy.structure.atoms import symbol_map
 
-def parse_set_of_forces(num_atoms, forces_filenames):
+def parse_set_of_forces(num_atoms, forces_filenames, verbose=True):
     hook = '' # Just for skipping the first line
+    is_parsed = True
     force_sets = []
-    for filename in forces_filenames:
+    for i, filename in enumerate(forces_filenames):
+        if verbose:
+            sys.stdout.write("%d. " % (i + 1))
         siesta_forces = iter_collect_forces(filename,
                                             num_atoms,
                                             hook,
                                             [1, 2, 3],
                                             word='')
-        if not siesta_forces:
-            return []
-        drift_force = get_drift_forces(siesta_forces)
-        force_sets.append(np.array(siesta_forces) - drift_force)
+        if check_forces(siesta_forces, num_atoms, filename, verbose=verbose):
+            drift_force = get_drift_forces(siesta_forces,
+                                           filename=filename,
+                                           verbose=verbose)
+            force_sets.append(np.array(siesta_forces) - drift_force)
+        else:
+            is_parsed = False
 
-    return force_sets
+    if is_parsed:
+        return force_sets
+    else:
+        return []
 
 def read_siesta(filename):
     siesta_in = SiestaIn(open(filename).read())
@@ -64,24 +76,24 @@ def read_siesta(filename):
     lattice = siesta_in._tags["latticevectors"]
     positions = siesta_in._tags["atomiccoordinates"]
     atypes = siesta_in._tags["chemicalspecieslabel"]
-    cell = Atoms(numbers=numbers,
-                 cell=lattice)
+    cell = Atoms(numbers=numbers, cell=lattice, scaled_positions=positions)
 
     coordformat = siesta_in._tags["atomiccoordinatesformat"]
     if coordformat == "fractional" or coordformat == "scaledbylatticevectors":
         cell.set_scaled_positions(positions)
     elif coordformat == "scaledcartesian":
         if siesta_in._tags['latticeconstant'] == 'ang':
-            cell.set_positions(np.array(positions) / Bohr)#convert from angstroem to Bohr 
+            cell.set_positions(np.array(positions) / Bohr)
         else:
             cell.set_positions(np.array(positions))
     elif coordformat == "notscaledcartesianang" or coordformat == "ang":
-        cell.set_positions(np.array(positions) / Bohr) #convert from angstroem to Bohr 
+        cell.set_positions(np.array(positions) / Bohr) 
     elif coordformat == "notscaledcartesianbohr" or coordformat == "bohr":
         cell.set_positions(np.array(positions))
     else:
-        print "The format %s for the AtomicCoordinatesFormat is not implemented"%coordformat
-        exit() 
+        print("The format %s for the AtomicCoordinatesFormat is not "
+              "implemented." % coordformat)
+        sys.exit(1) 
     
     return cell, atypes
 
@@ -121,7 +133,7 @@ def get_siesta_structure(cell,atypes):
 
     return lines
 
-class SiestaIn:
+class SiestaIn(object):
     _num_regex = '([+-]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)'
     _tags = { "latticeconstant":          1.0,
               "latticeconstantunit":     None,
@@ -140,8 +152,9 @@ class SiestaIn:
             - cell_parameters
             - atomic_species
         """
-        #capture tags
-        for tag,value,unit in re.findall('([\.A-Za-z]+)\s+?%s(?:[ ]+)?([A-Za-z]+)?'%self._num_regex,lines):
+        for tag,value,unit in re.findall(
+                '([\.A-Za-z]+)\s+?%s(?:[ ]+)?([A-Za-z]+)?' %
+                self._num_regex,lines):
             tag = tag.lower()
             if tag == "latticeconstant":
                 self._tags['latticeconstantunit'] = unit.lower()
@@ -160,19 +173,27 @@ class SiestaIn:
         acell = self._tags['latticeconstant']
 
         #capture the blocks
-        blocks = re.findall('%block\s+([A-Za-z_]+)\s((?:.+\n)+?(?=(?:\s+)?%endblock))',lines,re.MULTILINE)
+        blocks = re.findall(
+            '%block\s+([A-Za-z_]+)\s((?:.+\n)+?(?=(?:\s+)?%endblock))',
+            lines, re.MULTILINE)
         for tag,block in blocks:
             tag = tag.replace('_','').lower()
             if   tag == "chemicalspecieslabel":
                 lines = block.split('\n')[:-1]
-                self._tags["atomicnumbers"] = dict([map(int,species.split()[:2]) for species in lines])
-                self._tags[tag] = dict([(lambda x: (x[2],int(x[0])))(species.split()) for species in lines])
+                self._tags["atomicnumbers"] = dict([map(int,species.split()[:2])
+                                                    for species in lines])
+                self._tags[tag] = dict(
+                    [(lambda x: (x[2],int(x[0])))(species.split())
+                     for species in lines])
             elif tag == "latticevectors":
-                self._tags[tag] = [[ float(v)*acell for v in vector.split()] for vector in block.split('\n')[:3]]
+                self._tags[tag] = [[ float(v)*acell for v in vector.split()]
+                                   for vector in block.split('\n')[:3]]
             elif tag == "atomiccoordinatesandatomicspecies":
                 lines = block.split('\n')[:-1]
-                self._tags["atomiccoordinates"] = [ [float(x)  for x in atom.split()[:3]] for atom in lines ]
-                self._tags["atomicspecies"] = [ int(atom.split()[3]) for atom in lines]
+                self._tags["atomiccoordinates"] = [
+                    [float(x)  for x in atom.split()[:3]] for atom in lines]
+                self._tags["atomicspecies"] = [int(atom.split()[3])
+                                               for atom in lines]
        
         #check if the block are present
         self.check_present("atomicspecies")
@@ -181,12 +202,13 @@ class SiestaIn:
         self.check_present("chemicalspecieslabel")
             
         #translate the atomicspecies to atomic numbers
-        self._tags["atomicnumbers"] = [self._tags["atomicnumbers"][atype] for atype in self._tags["atomicspecies"]]
+        self._tags["atomicnumbers"] = [self._tags["atomicnumbers"][atype]
+                                       for atype in self._tags["atomicspecies"]]
     
     def check_present(self,tag):
         if not self._tags[tag]:
-            print "%s not present"%tag
-            exit()
+            print("%s not present" % tag)
+            sys.exit(1)
  
     def __str__(self):
         return self._tags
@@ -195,7 +217,7 @@ class SiestaIn:
 if __name__ == '__main__':
     import sys
     from phonopy.structure.symmetry import Symmetry
-    cell,atypes = read_siesta(sys.argv[1])
+    cell, atypes = read_siesta(sys.argv[1])
     symmetry = Symmetry(cell)
-    print "#", symmetry.get_international_table()
-    print get_siesta_structure(cell,atypes)
+    print("# %s" % symmetry.get_international_table())
+    print(get_siesta_structure(cell,atypes))

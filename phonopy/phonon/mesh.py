@@ -36,7 +36,7 @@ import numpy as np
 from phonopy.units import VaspToTHz
 from phonopy.structure.grid_points import GridPoints
 
-class Mesh:
+class Mesh(object):
     def __init__(self,
                  dynamical_matrix,
                  mesh,
@@ -135,14 +135,17 @@ class Mesh:
         w = open('mesh.yaml', 'w')
         eigenvalues = self._eigenvalues
         natom = self._cell.get_number_of_atoms()
-        lattice = np.linalg.inv(self._cell.get_cell()) # column vectors
+        rec_lattice = np.linalg.inv(self._cell.get_cell()) # column vectors
+
         w.write("mesh: [ %5d, %5d, %5d ]\n" % tuple(self._mesh))
         w.write("nqpoint: %-7d\n" % self._qpoints.shape[0])
-        w.write("natom:   %-7d\n" % natom)
         w.write("reciprocal_lattice:\n")
-        for vec, axis in zip(lattice.T, ('a*', 'b*', 'c*')):
+        for vec, axis in zip(rec_lattice.T, ('a*', 'b*', 'c*')):
             w.write("- [ %12.8f, %12.8f, %12.8f ] # %2s\n" %
                     (tuple(vec) + (axis,)))
+        w.write("natom:   %-7d\n" % natom)
+        w.write(str(self._cell))
+        w.write("\n")
         w.write("phonon:\n")
 
         for i, q in enumerate(self._qpoints):
@@ -180,7 +183,7 @@ class Mesh:
                 (num_qpoints, num_band, num_band,), dtype='complex128')
 
         if self._use_lapack_solver:
-            from phonopy.phonon.solver import get_phonons_at_qpoints
+            from phono3py.phonon.solver import get_phonons_at_qpoints
             get_phonons_at_qpoints(self._frequencies,
                                    self._eigenvectors,
                                    self._dynamical_matrix,

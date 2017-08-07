@@ -35,28 +35,41 @@
 import sys
 import numpy as np
 
-from phonopy.file_IO import iter_collect_forces, get_drift_forces
-from phonopy.interface.vasp import get_scaled_positions_lines
+from phonopy.file_IO import iter_collect_forces
+from phonopy.interface.vasp import (get_scaled_positions_lines, check_forces,
+                                    get_drift_forces)
 from phonopy.units import Bohr
 from phonopy.cui.settings import fracval
-from phonopy.structure.atoms import Atoms, symbol_map
+from phonopy.structure.atoms import PhonopyAtoms as Atoms
+from phonopy.structure.atoms import symbol_map
 
-def parse_set_of_forces(num_atoms, forces_filenames):
+def parse_set_of_forces(num_atoms,
+                        forces_filenames,
+                        verbose=True):
     hook = 'Forces acting on atoms'
+    is_parsed = True
     force_sets = []
-    for filename in forces_filenames:
+
+    for i, filename in enumerate(forces_filenames):
+        if verbose:
+            sys.stdout.write("%d. " % (i + 1))
         pwscf_forces = iter_collect_forces(filename,
                                            num_atoms,
                                            hook,
                                            [6, 7, 8],
                                            word='force')
-        if not pwscf_forces:
-            return []
+        if check_forces(pwscf_forces, num_atoms, filename, verbose=verbose):
+            drift_force = get_drift_forces(pwscf_forces,
+                                           filename=filename,
+                                           verbose=verbose)
+            force_sets.append(np.array(pwscf_forces) - drift_force)
+        else:
+            is_parsed = False
 
-        drift_force = get_drift_forces(pwscf_forces)
-        force_sets.append(np.array(pwscf_forces) - drift_force)
-        
-    return force_sets
+    if is_parsed:
+        return force_sets
+    else:
+        return []
 
 def read_pwscf(filename):
     pwscf_in = PwscfIn(open(filename).readlines())
@@ -76,7 +89,7 @@ def read_pwscf(filename):
     for x in species:
         if x not in unique_species:
             unique_species.append(x)
-    
+
     numbers = []
     is_unusual = False
     for x in species:
@@ -92,11 +105,11 @@ def read_pwscf(filename):
             if n > 0:
                 if n not in positive_numbers:
                     positive_numbers.append(n)
-    
+
         available_numbers = range(1, 119)
         for pn in positive_numbers:
             available_numbers.remove(pn)
-        
+
         for i, n in enumerate(numbers):
             if n < 1:
                 numbers[i] = available_numbers[-n]
@@ -125,10 +138,19 @@ def write_pwscf(filename, cell, pp_filenames):
 
 def write_supercells_with_displacements(supercell,
                                         cells_with_displacements,
-                                        pp_filenames):
+                                        pp_filenames,
+                                        pre_filename="supercell",
+                                        width=3):
     write_pwscf("supercell.in", supercell, pp_filenames)
     for i, cell in enumerate(cells_with_displacements):
-        write_pwscf("supercell-%03d.in" % (i + 1), cell, pp_filenames)
+        if cell is not None:
+            filename = "{pre_filename}-{0:0{width}}.in".format(
+                i + 1,
+                pre_filename=pre_filename,
+                width=width)
+            write_pwscf(filename,
+                        cell,
+                        pp_filenames)
 
 def get_pwscf_structure(cell, pp_filenames=None):
     lattice = cell.get_cell()
@@ -141,7 +163,7 @@ def get_pwscf_structure(cell, pp_filenames=None):
         if symbol not in unique_symbols:
             unique_symbols.append(symbol)
             atomic_species.append((symbol, m))
-    
+
     lines = ""
     lines += ("!    ibrav = 0, nat = %d, ntyp = %d\n" %
               (len(positions), len(unique_symbols)))
@@ -162,8 +184,8 @@ def get_pwscf_structure(cell, pp_filenames=None):
             lines += "\n"
 
     return lines
-    
-class PwscfIn:
+
+class PwscfIn(object):
     def __init__(self, lines):
         self._set_methods = {'ibrav':            self._set_ibrav,
                              'nat':              self._set_nat,
@@ -209,25 +231,27 @@ class PwscfIn:
 
         for tag in ['ibrav', 'nat', 'ntyp']:
             if tag not in elements:
-                print "%s is not found in the input file." % tag
+                print("%s is not found in the input file." % tag)
                 sys.exit(1)
-                    
-        for tag, self._values in elements.iteritems():
+
+        for tag in elements:
+            self._values = elements[tag]
             if tag == 'ibrav' or tag == 'nat' or tag == 'ntyp':
                 self._set_methods[tag]()
 
-        for tag, self._values in elements.iteritems():
+        for tag in elements:
+            self._values = elements[tag]
             if tag != 'ibrav' and tag != 'nat' and tag != 'ntyp':
                 self._set_methods[tag]()
 
     def _set_ibrav(self):
         ibrav = int(self._values[0])
         if ibrav != 0:
-            print "Only ibrav = 0 is supported."
+            print("Only ibrav = 0 is supported.")
             sys.exit(1)
 
         self._tags['ibrav'] = ibrav
-                
+
     def _set_nat(self):
         self._tags['nat'] = int(self._values[0])
 
@@ -237,7 +261,7 @@ class PwscfIn:
     def _set_lattice(self):
         unit = self._values[0]
         if unit == 'alat':
-            print "Only CELL_PARAMETERS format with alat is not supported."
+            print("Only CELL_PARAMETERS format with alat is not supported.")
             sys.exit(1)
         if unit == 'angstrom':
             factor = 1.0 / Bohr
@@ -245,23 +269,23 @@ class PwscfIn:
             factor = 1.0
 
         if len(self._values[1:]) < 9:
-            print "CELL_PARAMETERS is wrongly set."
+            print("CELL_PARAMETERS is wrongly set.")
             sys.exit(1)
-            
+
         lattice = np.reshape([float(x) for x in self._values[1:10]], (3, 3))
         self._tags['cell_parameters'] = lattice * factor
-        
+
     def _set_positions(self):
         unit = self._values[0]
         if unit != 'crystal':
-            print ("Only ATOMIC_POSITIONS format with "
-                   "crystal coordinates is supported.")
+            print("Only ATOMIC_POSITIONS format with "
+                  "crystal coordinates is supported.")
             sys.exit(1)
-            
+
         natom = self._tags['nat']
         pos_vals = self._values[1:]
         if len(pos_vals) < natom * 4:
-            print "ATOMIC_POSITIONS is wrongly set."
+            print("ATOMIC_POSITIONS is wrongly set.")
             sys.exit(1)
 
         positions = []
@@ -269,30 +293,21 @@ class PwscfIn:
             positions.append(
                 [pos_vals[i * 4],
                  [float(x) for x in pos_vals[i * 4 + 1:i * 4 + 4]]])
-            
+
         self._tags['atomic_positions'] = positions
 
     def _set_atom_types(self):
         num_types = self._tags['ntyp']
         if len(self._values) < num_types * 3:
-            print "ATOMIC_SPECIES is wrongly set."
+            print("ATOMIC_SPECIES is wrongly set.")
             sys.exit(1)
 
         species = []
-        
+
         for i in range(num_types):
             species.append(
                 [self._values[i * 3],
                  float(self._values[i * 3 + 1]),
                  self._values[i * 3 + 2]])
-            
+
         self._tags['atomic_species'] = species
-        
-if __name__ == '__main__':
-    import sys
-    from phonopy.structure.symmetry import Symmetry
-    # abinit = PwscfIn(open(sys.argv[1]).readlines())
-    cell, pp_filenames = read_pwscf(sys.argv[1])
-    # symmetry = Symmetry(cell)
-    # print "#", symmetry.get_international_table()
-    print get_pwscf_structure(cell, pp_filenames)

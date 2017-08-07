@@ -1,7 +1,12 @@
-x.. _command_options:
+.. _command_options:
 
 Command options
 ===============
+
+.. contents::
+   :depth: 2
+   :local:
+
 
 Some of command-line options are equivalent to respective setting
 tags:
@@ -18,14 +23,21 @@ tags:
 * ``--dim`` (``DIM``)
 * ``--dos`` (``DOS = .TRUE.``)
 * ``--eigvecs``, ``--eigenvectors`` (``EIGENVECTORS = .TRUE.``)
+* ``--factor`` (``FREQUENCY_CONVERSION_FACTOR``)
 * ``--fits_debye_model`` (``DEBYE_MODEL = .TRUE.``)
+* ``--fmax`` (``FMAX``)
+* ``--fmin`` (``FMIN``)
+* ``--fpitch`` (``FPITCH``)
 * ``--gc``, ``--gamma_center`` (``GAMMA_CENTER``)
 * ``--gv``, ``--group_velocity`` (``GROUP_VELOCITY = .TRUE.``)
 * ``--gv_delta_q`` (``GV_DELTA_Q``)
+* ``--hdf5`` (``HDF5 = .TRUE.``)
 * ``--irreps`` (``IRREPS``)
 * ``--lcg``, ``--little_cogroup`` (``LITTLE_COGROUP``)
 * ``--modulation`` (``MODULATION``)
-* ``--mp``, ``--mesh`` (``MP``)
+* ``--moment`` (``MOMENT = .TRUE.``)
+* ``--moment_order`` (``MOMENT_ORDER``)
+* ``--mp``, ``--mesh`` (``MP`` or ``MESH``)
 * ``--nac`` (``NAC = .TRUE.``)
 * ``--nosym`` (``SYMMETRY = .FALSE.``)
 * ``--nomeshsym`` (``MESH_SYMMETRY = .FALSE.``)
@@ -40,12 +52,14 @@ tags:
 * ``-t`` (``TPROP``)
 * ``--td`` (``TDISP``)
 * ``--tdm`` (``TDISPMAT``)
+* ``--tdm_cif`` (``TDISPMAT_CIF``)
 * ``--thm``, ``--tetrahedron_method`` (``TETRAHEDRON``)
 * ``--tmin`` (``TMIN``)
 * ``--tmax`` (``TMAX``)
 * ``--tstep`` (``TSTEP``)
 * ``--writedm`` (``WRITEDM = .TRUE.``)
 * ``--writefc`` (``FORCE_CONSTANTS = WRITE``)
+* ``--xyz_projection`` (``XYZ_PROJECTION = .TRUE.``)
 
 When both of command-line option and setting tag for the same purpose
 are set simultaneously, the command-line options overide the setting
@@ -53,13 +67,14 @@ tags.
 
 .. _force_calculators:
 
-Force calculators
-------------------
+Choice of force calculator
+---------------------------
 
 Currently interfaces for VASP, Wien2k, Pwscf, Abinit, and Elk are
 prepared. Wien2k, Pwscf, Abinit and Elk interfaces are invoked with
 ``--wienk2``, ``--pwscf``, ``--abinit``, and ``--elk`` options,
-respectively, and if none of these options is specified, VASP mode is invoked.
+respectively, and if none of these options or ``--vasp`` option is
+specified, VASP mode is invoked.
 
 The details about these interfaces are found at :ref:`calculator_interfaces`.
 
@@ -141,6 +156,17 @@ input file that contains the unit cell crystal structure, e.g.,
 
    % phonopy --elk -c elk-unitcell.in band.conf
 
+.. _vasp_mode:
+
+``--vasp``
+~~~~~~~~~~~~
+
+This doesn't change the default behaviour, but ``vasp`` will appear as
+the calculator such as in ``band.yaml``::
+
+   calculator: vasp
+   nqpoint: 204    
+   ...
   
 .. _cell_filename_option:
 
@@ -168,6 +194,8 @@ directory. The default file names for the calculators are as follows::
 Create ``FORCE_SETS``
 ----------------------
 
+.. _f_force_sets_option:
+
 ``-f`` or ``--forces``
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -177,7 +205,7 @@ VASP interface
 ^^^^^^^^^^^^^^
 
 ``FORCE_SETS`` file is created from ``disp.yaml``, which is an output
-file when creating supercell with displacements, and
+file when creating supercells with displacements, and
 ``vasprun.xml``'s, which are the VASP output files. ``disp.yaml`` in
 the current directory is automatically read. The order of
 displacements written in ``disp.yaml`` file has to correpond to that of
@@ -196,15 +224,7 @@ Attention:
   expansions are useful, e.g., ``disp-*/vasprun.xml``, or
   ``disp-{001..128}/vasprun.xml`` (for zsh, and recent bash).
 
-..
-   ``--fz`` option is used to subtract residual forces in the equilibrium
-   supercell.
 
-   ::
-
-      % phonopy --fz sposcar/vasprun.xml disp-001/vasprun.xml ...
-
-   Usually the ``-f`` option is preferable to ``--fz``.
 
 .. _abinit_force_sets_option:
 
@@ -264,6 +284,8 @@ For more information, :ref:`wien2k_interface`.
 Elk interface
 ^^^^^^^^^^^^^^^^
 
+
+
 ``FORCE_SETS`` file is created from ``disp.yaml`` and Elk output
 files.
 
@@ -271,6 +293,36 @@ files.
 
    % phonopy --elk -f disp-001/INFO.OUT disp-002/INFO.OUT  ...
 
+
+.. _fz_force_sets_option:
+
+``--fz``
+~~~~~~~~~
+
+``--fz`` option is used to subtract residual forces frown the forces
+calculated for the supercells with displacements. Here the residual
+forces mean that the forces calculated for the perfect supercell for
+which the number of atoms has to be the same as those for the
+supercells with displacements. If the forces are accurately calculated
+by calculators, the residual forces should be canceled when plus-minus
+displacements are employed (see :ref:`pm_displacement_tag`), that is
+the default option in phonopy. Therefore ``--fz`` option is expected
+to be useful when ``PM = .FALSE.`` is set in the phonopy setting file.
+
+The usage of this option is almost the same as that of ``-f`` option
+except that one more argument is inserted at the front. Mind that
+``--fz`` is exclusively used with ``-f`` option. The example 
+for the VASP interface is shown below::
+
+   % phonopy --fz sposcar/vasprun.xml disp-001/vasprun.xml ...
+
+where ``sposcar/vasprun.xml`` assumes the output file for the perfect
+supercell containing residual forces.
+
+This option perhaps works for the other calculator interfaces than the
+VASP interface, but it is not tested yet. It would be appreciated if
+you report it to the phonopy mailing list when you find it
+does/doesn't work for any other calculator interfaces.
 
 Create ``FORCE_CONSTANTS``
 --------------------------
@@ -316,33 +368,6 @@ Result is plotted (saved) to PDF file.
 ::
 
    % phonopy -p -s
-
-
-Unit conversion factor
-----------------------
-
-.. _unit_conversion_factor_option:
-
-``--factor``
-~~~~~~~~~~~~
-
-Unit conversion factor of frequency from input values to your favorite
-unit is specified. The default value is that to convert to THz. The
-default conversion factors for ``wien2k``, ``abinit``, ``pwscf``, and
-``elk`` are 3.44595, 21.49068, 108.9708, and 154.1079
-respectively. These are determined following the physical unit systems
-of the calculators. How to calcualte these conversion factors is
-explained at :ref:`physical_unit_conversion`.
-
-When calculating thermal property, the factor to THz is
-required. Otherwise the calculated thermal properties have wrong
-units. In the case of band structure plot, any factor can be used,
-where the frequency is simply shown in the unit you specified.
-
-::
-
-   % phonopy --factor=521.471
-
 
 
 Log level
@@ -415,3 +440,13 @@ calculation results are written into ``mesh.hdf5`` but not into
 ``mesh.yaml``. Using this option may reduce the data output size and
 thus writing time when ``mesh.yaml`` is huge, e.g., eigenvectors are
 written on a dense sampling mesh.
+
+``qpoints.hdf5``
+^^^^^^^^^^^^^^^^^
+
+In the specific q-points calculations (:ref:`qpoints_tag`),
+calculation results are written into ``qpoints.hdf5`` but not into
+``qpoints.yaml``. With :ref:`writedm_tag`, dynamical matrices are also
+stored in ``qpoints.hdf5``. Using this option may be useful with large
+set of q-points with including eigenvector or dynamical matrix output.
+

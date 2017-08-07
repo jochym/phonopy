@@ -32,6 +32,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import sys
 import numpy as np
 from phonopy.phonon.tetrahedron_mesh import TetrahedronMesh
 
@@ -52,7 +53,7 @@ def write_partial_dos(frequency_points,
     fp = open('partial_dos.dat', 'w')
     if comment is not None:
         fp.write("# %s\n" % comment)
-        
+
     for freq, pdos in zip(frequency_points, partial_dos.T):
         fp.write("%20.10f" % freq)
         fp.write(("%20.10f" * len(pdos)) % tuple(pdos))
@@ -101,19 +102,24 @@ def plot_partial_dos(pyplot,
                      draw_grid=True,
                      flip_xy=False):
     plots = []
-
-    num_atom = len(partial_dos)
+    num_pdos = len(partial_dos)
 
     if indices is None:
         indices = []
-        for i in range(num_atom):
+        for i in range(num_pdos):
             indices.append([i])
 
     for set_for_sum in indices:
-        pdos_sum = np.zeros(frequency_points.shape, dtype='double')
+        pdos_sum = np.zeros_like(frequency_points)
         for i in set_for_sum:
-            if i > num_atom - 1 or i < 0:
-                print("Your specified atom number is out of range.")
+            if i > num_pdos - 1:
+                print("Index number \'%d\' is specified," % (i + 1))
+                print("but it is not allowed to be larger than the number of "
+                      "atoms.")
+                raise ValueError
+            if i < 0:
+                print("Index number \'%d\' is specified, but it must be "
+                      "positive." % (i + 1))
                 raise ValueError
             pdos_sum += partial_dos[i]
         if flip_xy:
@@ -130,8 +136,8 @@ def plot_partial_dos(pyplot,
         pyplot.ylabel(ylabel)
 
     pyplot.grid(draw_grid)
-    
-class NormalDistribution:
+
+class NormalDistribution(object):
     def __init__(self, sigma):
         self._sigma = sigma
 
@@ -139,7 +145,7 @@ class NormalDistribution:
         return 1.0 / np.sqrt(2 * np.pi) / self._sigma * \
             np.exp(-x**2 / 2.0 / self._sigma**2)
 
-class CauchyDistribution:
+class CauchyDistribution(object):
     def __init__(self, gamma):
         self._gamma = gamma
 
@@ -147,7 +153,7 @@ class CauchyDistribution:
         return self._gamma / np.pi / (x**2 + self._gamma**2)
 
 
-class Dos:
+class Dos(object):
     def __init__(self, mesh_object, sigma=None, tetrahedron_method=False):
         self._mesh_object = mesh_object
         self._frequencies = mesh_object.get_frequencies()
@@ -190,16 +196,14 @@ class Dos:
         f_min = self._frequencies.min()
         f_max = self._frequencies.max()
 
-        if self._tetrahedron_mesh is not None:
-            self._sigma = 0
         if self._sigma is None:
             self._sigma = (f_max - f_min) / 100.0
-            
+
         if freq_min is None:
             f_min -= self._sigma * 10
         else:
             f_min = freq_min
-            
+
         if freq_max is None:
             f_max += self._sigma * 10
         else:
@@ -209,7 +213,9 @@ class Dos:
             f_delta = (f_max - f_min) / 200.0
         else:
             f_delta = freq_pitch
-        self._frequency_points = np.arange(f_min, f_max + f_delta * 0.1, f_delta)
+        self._frequency_points = np.arange(f_min,
+                                           f_max + f_delta * 0.1,
+                                           f_delta)
 
 class TotalDos(Dos):
     def __init__(self, mesh_object, sigma=None, tetrahedron_method=False):
@@ -246,16 +252,16 @@ class TotalDos(Dos):
             from scipy.optimize import curve_fit
         except ImportError:
             print("You need to install python-scipy.")
-            exit(1)
+            sys.exit(1)
 
         def Debye_dos(freq, a):
             return a * freq**2
 
         freq_min = self._frequency_points.min()
         freq_max = self._frequency_points.max()
-        
+
         if freq_max_fit is None:
-            N_fit = len(self._frequency_points) / 4.0 # Hard coded
+            N_fit = int(len(self._frequency_points) / 4.0) # Hard coded
         else:
             N_fit = int(freq_max_fit / (freq_max - freq_min) *
                         len(self._frequency_points))
@@ -299,7 +305,7 @@ class TotalDos(Dos):
             comment = "Sigma = %f" % self._sigma
         else:
             comment = "Tetrahedron method"
-            
+
         write_total_dos(self._frequency_points,
                         self._dos,
                         comment=comment)
@@ -315,58 +321,61 @@ class PartialDos(Dos):
                  mesh_object,
                  sigma=None,
                  tetrahedron_method=False,
-                 direction=None):
+                 direction=None,
+                 xyz_projection=False):
         Dos.__init__(self,
                      mesh_object,
                      sigma=sigma,
                      tetrahedron_method=tetrahedron_method)
         self._eigenvectors = self._mesh_object.get_eigenvectors()
-
-        num_atom = self._frequencies.shape[1] // 3
-        i_x = np.arange(num_atom, dtype='int') * 3
-        i_y = np.arange(num_atom, dtype='int') * 3 + 1
-        i_z = np.arange(num_atom, dtype='int') * 3 + 2
-        if direction is not None:
-            self._direction = np.array(
-                direction, dtype='double') / np.linalg.norm(direction)
-            proj_eigvecs = self._eigenvectors[:, i_x, :] * self._direction[0]
-            proj_eigvecs += self._eigenvectors[:, i_y, :] * self._direction[1]
-            proj_eigvecs += self._eigenvectors[:, i_z, :] * self._direction[2]
-            self._eigvecs2 = np.abs(proj_eigvecs) ** 2
-        else:
-            self._direction = None
-            self._eigvecs2 = np.abs(self._eigenvectors[:, i_x, :]) ** 2
-            self._eigvecs2 += np.abs(self._eigenvectors[:, i_y, :]) ** 2
-            self._eigvecs2 += np.abs(self._eigenvectors[:, i_z, :]) ** 2
         self._partial_dos = None
 
+        if xyz_projection:
+            self._eigvecs2 = np.abs(self._eigenvectors) ** 2
+        else:
+            num_atom = self._frequencies.shape[1] // 3
+            i_x = np.arange(num_atom, dtype='int') * 3
+            i_y = np.arange(num_atom, dtype='int') * 3 + 1
+            i_z = np.arange(num_atom, dtype='int') * 3 + 2
+            if direction is None:
+                self._eigvecs2 = np.abs(self._eigenvectors[:, i_x, :]) ** 2
+                self._eigvecs2 += np.abs(self._eigenvectors[:, i_y, :]) ** 2
+                self._eigvecs2 += np.abs(self._eigenvectors[:, i_z, :]) ** 2
+            else:
+                d = np.array(direction, dtype='double')
+                d /= np.linalg.norm(direction)
+                proj_eigvecs = self._eigenvectors[:, i_x, :] * d[0]
+                proj_eigvecs += self._eigenvectors[:, i_y, :] * d[1]
+                proj_eigvecs += self._eigenvectors[:, i_z, :] * d[2]
+                self._eigvecs2 = np.abs(proj_eigvecs) ** 2
+
     def run(self):
+        num_pdos = self._eigvecs2.shape[1]
+        num_freqs = len(self._frequency_points)
+        self._partial_dos = np.zeros((num_pdos, num_freqs), dtype='double')
         if self._tetrahedron_mesh is None:
             self._run_smearing_method()
         else:
             self._run_tetrahedron_method()
 
     def _run_smearing_method(self):
-        pdos = []
         weights = self._weights / float(np.sum(self._weights))
-        for freq in self._frequency_points:
+        for i, freq in enumerate(self._frequency_points):
             amplitudes = self._smearing_function.calc(self._frequencies - freq)
-            pdos.append(self._get_partial_dos_at_freq(amplitudes, weights))
-        self._partial_dos = np.transpose(pdos)
+            for j in range(self._partial_dos.shape[0]):
+                self._partial_dos[j, i]= np.dot(
+                    weights, self._eigvecs2[:, j, :] * amplitudes).sum()
 
     def _run_tetrahedron_method(self):
-        num_freqs = len(self._frequency_points)
-        num_atom = self._eigvecs2.shape[1]
-        self._partial_dos = np.zeros((num_atom, num_freqs), dtype='double')
         thm = self._tetrahedron_mesh
         thm.set(value='I', frequency_points=self._frequency_points)
         for i, iw in enumerate(thm):
             w = self._weights[i]
             # for ib, frac in enumerate(self._eigvecs2[i].T):
-            #     for j in range(num_freqs):
+            #     for j in range(len(self._frequency_points)):
             #         self._partial_dos[:, j] += iw[j, ib] * frac * w
             self._partial_dos += np.dot(iw * w, self._eigvecs2[i].T).T
-        
+
     def get_partial_dos(self):
         """
         frequency_points: Sampling frequencies
@@ -404,20 +413,13 @@ class PartialDos(Dos):
                          ylabel=_ylabel,
                          draw_grid=draw_grid,
                          flip_xy=flip_xy)
-    
+
     def write(self):
         if self._tetrahedron_mesh is None:
             comment = "Sigma = %f" % self._sigma
         else:
             comment = "Tetrahedron method"
-            
+
         write_partial_dos(self._frequency_points,
                           self._partial_dos,
                           comment=comment)
-
-    def _get_partial_dos_at_freq(self, amplitudes, weights):
-        num_band = self._frequencies.shape[1]
-        pdos = [(np.dot(weights, self._eigvecs2[:, i, :] * amplitudes)).sum()
-                for i in range(num_band // 3)]
-        return pdos
-

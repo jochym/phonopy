@@ -52,7 +52,7 @@ def run_tetrahedron_method(data_out,
     except ImportError:
         import sys
         print("Phonopy C-extension has to be built properly.")
-        sys.exit(0)
+        sys.exit(1)
 
     phonoc.run_tetrahedron_method(data_out,
                                   data_in,
@@ -132,7 +132,7 @@ def _get_tetrahedra_frequencies_Py(gp,
         t_frequencies[:, i, :] = frequencies[gp_ir_index[neighbors]].T
     return t_frequencies
 
-class TetrahedronMesh:
+class TetrahedronMesh(object):
     def __init__(self,
                  cell,
                  frequencies, # only at ir-grid-points
@@ -174,7 +174,7 @@ class TetrahedronMesh:
     def __iter__(self):
         return self
             
-    def next(self):
+    def __next__(self):
         if self._grid_point_count == len(self._ir_grid_points):
             raise StopIteration
         else:
@@ -188,6 +188,9 @@ class TetrahedronMesh:
             self._integration_weights /= np.prod(self._mesh)
             self._grid_point_count += 1
             return self._integration_weights
+
+    def next(self):
+        return self.__next__()
 
     def get_integration_weights(self):
         return self._integration_weights

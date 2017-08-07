@@ -38,7 +38,7 @@ try:
 except ImportError:
     import sys
     print("Phonopy C-extension has to be built properly.")
-    sys.exit(0)
+    sys.exit(1)
 
 parallelepiped_vertices = np.array([[0, 0, 0],
                                     [1, 0, 0],
@@ -101,7 +101,7 @@ def get_tetrahedra_integration_weight(omegas,
             function)
         return integration_weights
 
-class TetrahedronMethod:
+class TetrahedronMethod(object):
     def __init__(self,
                  primitive_vectors=None, # column vectors
                  mesh=None,

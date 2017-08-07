@@ -60,12 +60,12 @@ def write_FORCE_SETS(dataset, filename='FORCE_SETS'):
             fp.write("%15.10f %15.10f %15.10f\n" % (tuple(f)))
 
 def parse_FORCE_SETS(is_translational_invariance=False, filename="FORCE_SETS"):
-    f = open(filename, 'r')
-    return _get_set_of_forces(f, is_translational_invariance)
+    with open(filename, 'r') as f:
+        return _get_set_of_forces(f, is_translational_invariance)
 
 def parse_FORCE_SETS_from_strings(strings, is_translational_invariance=False):
-    return _get_set_of_forces(StringIO.StringIO(strings),
-                             is_translational_invariance)
+    return _get_set_of_forces(StringIO(strings),
+                              is_translational_invariance)
 
 def _get_set_of_forces(f, is_translational_invariance):
     set_of_forces = []
@@ -102,17 +102,6 @@ def _get_line_ignore_blank(f):
         line = _get_line_ignore_blank(f)
     return line
 
-def get_drift_forces(forces, filename=None):
-    drift_force = np.sum(forces, axis=0) / len(forces)
-    if filename is None:
-        print("Drift force")
-    else:
-        print("Drift force of %s" % filename)
-    print("%12.8f %12.8f %12.8f" % tuple(drift_force))
-    print("This drift force was subtracted from forces.")
-
-    return drift_force
-    
 def collect_forces(f, num_atom, hook, force_pos, word=None):
     for line in f:
         if hook in line:
@@ -128,9 +117,11 @@ def collect_forces(f, num_atom, hook, force_pos, word=None):
             
         elems = line.split()
         if len(elems) > force_pos[2]:
-            forces.append([float(elems[i]) for i in force_pos])
-            # calculation = 'scf'
-            # forces.append([float(x) for x in elems[6:9]])
+            try:
+                forces.append([float(elems[i]) for i in force_pos])
+            except ValueError:
+                forces = []
+                break
         else:
             return False
 
@@ -158,7 +149,8 @@ def iter_collect_forces(filename,
             prev_forces = forces[:]
 
     if i == max_iter - 1:
-        print("Reached to max number of iterations (%d)." % max_iter)
+        sys.stderr.write("Reached to max number of iterations (%d).\n" %
+                         max_iter)
         
     return forces
     
@@ -179,9 +171,8 @@ def write_FORCE_CONSTANTS(force_constants, filename='FORCE_CONSTANTS'):
 def write_force_constants_to_hdf5(force_constants,
                                   filename='force_constants.hdf5'):
     import h5py
-    w = h5py.File(filename, 'w')
-    w.create_dataset('force_constants', data=force_constants)
-    w.close()
+    with h5py.File(filename, 'w') as w:
+        w.create_dataset('force_constants', data=force_constants)
 
 def parse_FORCE_CONSTANTS(filename="FORCE_CONSTANTS"):
     fcfile = open(filename)
@@ -199,8 +190,10 @@ def parse_FORCE_CONSTANTS(filename="FORCE_CONSTANTS"):
 
 def read_force_constants_hdf5(filename="force_constants.hdf5"):
     import h5py
-    f = h5py.File(filename)
-    return f[f.keys()[0]][:]
+    with h5py.File(filename, 'r') as f:
+        fc = f[f.keys()[0]][:]
+        return fc
+    return None
 
 #
 # disp.yaml
@@ -210,14 +203,14 @@ def parse_disp_yaml(filename="disp.yaml", return_cell=False):
         import yaml
     except ImportError:
         print("You need to install python-yaml.")
-        exit(1)
+        sys.exit(1)
         
     try:
         from yaml import CLoader as Loader
     except ImportError:
         from yaml import Loader
 
-    from phonopy.structure.atoms import Atoms
+    from phonopy.structure.atoms import PhonopyAtoms as Atoms
 
     dataset = yaml.load(open(filename), Loader=Loader)
     natom = dataset['natom']
@@ -239,8 +232,18 @@ def parse_disp_yaml(filename="disp.yaml", return_cell=False):
     
     if return_cell:
         lattice = dataset['lattice']
-        positions = [x['position'] for x in dataset['atoms']]
-        symbols = [x['symbol'] for x in dataset['atoms']]
+        if 'points' in dataset:
+            data_key = 'points'
+            pos_key = 'coordinates'
+        elif 'atoms' in dataset:
+            data_key = 'atoms'
+            pos_key = 'position'
+        else:
+            data_key = None
+            pos_key = None
+        
+        positions = [x[pos_key] for x in dataset[data_key]]
+        symbols = [x['symbol'] for x in dataset[data_key]]
         cell = Atoms(cell=lattice,
                      scaled_positions=positions,
                      symbols=symbols,
@@ -251,28 +254,23 @@ def parse_disp_yaml(filename="disp.yaml", return_cell=False):
 
 def write_disp_yaml(displacements, supercell, directions=None,
                     filename='disp.yaml'):
-    file = open(filename, 'w')
-    file.write("natom: %4d\n" % supercell.get_number_of_atoms())
-    file.write("displacements:\n")
+
+    text = []
+    text.append("natom: %4d" % supercell.get_number_of_atoms())
+    text.append("displacements:")
     for i, disp in enumerate(displacements):
-        file.write("- atom: %4d\n" % (disp[0] + 1))
+        text.append("- atom: %4d" % (disp[0] + 1))
         if directions is not None:
-            file.write("  direction:\n")
-            file.write("    [ %20.16f,%20.16f,%20.16f ]\n" % tuple(directions[i][1:4]))
-        file.write("  displacement:\n")
-        file.write("    [ %20.16f,%20.16f,%20.16f ]\n" % tuple(disp[1:4]))
-            
-    file.write("lattice:\n")
-    for axis in supercell.get_cell():
-        file.write("- [ %20.15f,%20.15f,%20.15f ]\n" % tuple(axis))
-    symbols = supercell.get_chemical_symbols()
-    positions = supercell.get_scaled_positions()
-    file.write("atoms:\n")
-    for i, (s, v) in enumerate(zip(symbols, positions)):
-        file.write("- symbol: %-2s # %d\n" % (s, i+1))
-        file.write("  position: [ %18.14f,%18.14f,%18.14f ]\n" % \
-                       (v[0], v[1], v[2]))
-    file.close()
+            text.append("  direction:")
+            text.append("    [ %20.16f,%20.16f,%20.16f ]" %
+                        tuple(directions[i][1:4]))
+        text.append("  displacement:")
+        text.append("    [ %20.16f,%20.16f,%20.16f ]" % tuple(disp[1:4]))
+
+    text.append(str(supercell))
+
+    with open(filename, 'w') as w:
+        w.write("\n".join(text))
 
 #
 # DISP (old phonopy displacement format)
@@ -308,7 +306,7 @@ def parse_BORN(primitive, symprec=1e-5, is_symmetry=True, filename="BORN"):
     return _parse_BORN_from_file_object(f, primitive, symprec, is_symmetry)
 
 def parse_BORN_from_strings(strings, primitive, symprec=1e-5, is_symmetry=True):
-    f = StringIO.StringIO(strings)
+    f = StringIO(strings)
     return _parse_BORN_from_file_object(f, primitive, symprec, is_symmetry)
 
 def _parse_BORN_from_file_object(f, primitive, symprec, is_symmetry):
@@ -320,12 +318,15 @@ def get_born_parameters(f, primitive, symmetry):
     from phonopy.harmonic.force_constants import similarity_transformation
 
     # Read unit conversion factor, damping factor, ...
-    factors = [float(x) for x in f.readline().split()]
-    if len(factors) < 1:
+    line_arr = f.readline().split()
+    if len(line_arr) < 1:
         print("BORN file format of line 1 is incorrect")
         return False
-    if len(factors) < 2:
-        factors = factors[0]
+    if len(line_arr) > 0:
+        try:
+            factor = float(line_arr[0])
+        except (ValueError, TypeError):
+            factor = None
 
     # Read dielectric constant
     line = f.readline().split()
@@ -362,7 +363,7 @@ def get_born_parameters(f, primitive, symmetry):
                                             born[map_atoms[i]])
 
     non_anal = {'born': born,
-                'factor': factors,
+                'factor': factor,
                 'dielectric': dielectric }
 
     return non_anal

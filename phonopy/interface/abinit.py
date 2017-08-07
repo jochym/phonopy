@@ -35,25 +35,35 @@
 import sys
 import numpy as np
 
-from phonopy.file_IO import collect_forces, get_drift_forces
-from phonopy.interface.vasp import get_scaled_positions_lines
+from phonopy.file_IO import collect_forces
+from phonopy.interface.vasp import (get_scaled_positions_lines, check_forces,
+                                    get_drift_forces)
 from phonopy.units import Bohr
 from phonopy.cui.settings import fracval
-from phonopy.structure.atoms import Atoms
+from phonopy.structure.atoms import PhonopyAtoms as Atoms
 
-def parse_set_of_forces(num_atoms, forces_filenames):
+def parse_set_of_forces(num_atoms, forces_filenames, verbose=True):
     hook = 'cartesian forces (eV/Angstrom)'
+    is_parsed = True
     force_sets = []
-    for filename in forces_filenames:
+    for i, filename in enumerate(forces_filenames):
+        if verbose:
+            sys.stdout.write("%d. " % (i + 1))
+
         f = open(filename)
         abinit_forces = collect_forces(f, num_atoms, hook, [1, 2, 3])
-        if not abinit_forces:
-            return []
+        if check_forces(abinit_forces, num_atoms, filename, verbose=verbose):
+            drift_force = get_drift_forces(abinit_forces,
+                                           filename=filename,
+                                           verbose=verbose)
+            force_sets.append(np.array(abinit_forces) - drift_force)
+        else:
+            is_parsed = False
 
-        drift_force = get_drift_forces(abinit_forces)
-        force_sets.append(np.array(abinit_forces) - drift_force)
-
-    return force_sets
+    if is_parsed:
+        return force_sets
+    else:
+        return []
 
 def read_abinit(filename):
     abinit_in = AbinitIn(open(filename).readlines())
@@ -115,7 +125,7 @@ def get_abinit_structure(cell):
 
     return lines
 
-class AbinitIn:
+class AbinitIn(object):
     def __init__(self, lines):
         self._set_methods = {'acell':     self._set_acell,
                              'natom':     self._set_natom,
@@ -158,14 +168,16 @@ class AbinitIn:
 
         for tag in ['natom', 'ntypat']:
             if tag not in elements:
-                print "%s is not found in the input file." % tag
+                print("%s is not found in the input file." % tag)
                 sys.exit(1)
 
-        for tag, self._values in elements.iteritems():
+        for tag in elements:
+            self._values = elements[tag]
             if tag == 'natom' or tag == 'ntypat':
                 self._set_methods[tag]()
 
-        for tag, self._values in elements.iteritems():
+        for tag in elements:
+            self._values = elements[tag]
             if tag != 'natom' and tag != 'ntypat':
                 self._set_methods[tag]()
 
@@ -270,5 +282,5 @@ if __name__ == '__main__':
     abinit = AbinitIn(open(sys.argv[1]).readlines())
     cell = read_abinit(sys.argv[1])
     symmetry = Symmetry(cell)
-    print "#", symmetry.get_international_table()
-    print get_abinit_structure(cell)
+    print("# %s" % symmetry.get_international_table())
+    print(get_abinit_structure(cell))
